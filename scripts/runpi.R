@@ -5,7 +5,7 @@ jrsd <- as.numeric(args[1])
 ngibbs <- as.numeric(args[2])
 runid <- args[3]
 folder <- args[4]
-filename <- sprintf("run_results/%s/%s_%g_hre_%s.dat", folder, species, jrsd, runid)
+filename <- sprintf("run_results/%s/ALL_%g_hre_%s.dat", folder, jrsd, runid)
 dir.create(sprintf("run_results/%s", folder), showWarnings = FALSE)
 
 source("inv_bayes.R")

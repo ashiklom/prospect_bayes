@@ -47,22 +47,22 @@ echo "=========================================================="
 # Run the R scripts
 # Arguments to runpi.R: JumpRSD ngibbs runid folder
 
-Rscript scripts/runpi.R 0.05 1e4 run01 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run02 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run03 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run04 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run05 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run06 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run07 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run08 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run09 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run10 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run11 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run12 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run13 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run14 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run15 $FOLDER &
-Rscript scripts/runpi.R 0.05 1e4 run16 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run01 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run02 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run03 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run04 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run05 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run06 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run07 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run08 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run09 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run10 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run11 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run12 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run13 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run14 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run15 $FOLDER &
+Rscript scripts/runpi.R 0.05 1e6 run16 $FOLDER &
 
 wait
 
