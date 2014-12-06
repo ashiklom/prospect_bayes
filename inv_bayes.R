@@ -651,19 +651,19 @@ pinvbayes <- function(obs.spec,
                 
                 v1 <- sapply(1:n.sp, function(j) randeff.s[1] + n.ls[[j]]/2)
                 v2N <- sapply(1:n.sp, function(j) randeff.s[2] + (n.ls[[j]] - 1) * var(ls.N.i[[j]]))
-                preN <- gamma(n.sp, v1, v2N)
+                preN <- rgamma(n.sp, v1, v2N)
                 ls.N.sd <- 1/sqrt(preN)
 
                 v2Cab <- sapply(1:n.sp, function(j) randeff.s[2] + (n.ls[[j]] - 1) * var(ls.Cab.i[[j]]))
-                preCab <- gamma(n.sp, v1, v2Cab)
+                preCab <- rgamma(n.sp, v1, v2Cab)
                 ls.Cab.sd <- 1/sqrt(preCab)
 
                 v2Cw <- sapply(1:n.sp, function(j) randeff.s[2] + (n.ls[[j]] - 1) * var(ls.Cw.i[[j]]))
-                preCw <- gamma(n.sp, v1, v2Cw)
+                preCw <- rgamma(n.sp, v1, v2Cw)
                 ls.Cw.sd <- 1/sqrt(preCw)
 
                 v2Cm <- sapply(1:n.sp, function(j) randeff.s[2] + (n.ls[[j]] - 1) * var(ls.Cm.i[[j]]))
-                preCm <- gamma(n.sp, v1, v2Cm)
+                preCm <- rgamma(n.sp, v1, v2Cm)
                 ls.Cm.sd <- 1/sqrt(preCm)
 
 
