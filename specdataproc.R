@@ -6,9 +6,13 @@ specmatrix <- function(Species,
                        path="data/SE_spectra/Reflectance/"
                        ){
         flist <- list.files(path)
-        flist.split <- strsplit(flist, "_")
-        fset.inds <- which(sapply(flist.split, "[", 5) == Species)
-        fset <- flist[fset.inds]
+        if(Species != "All"){
+                flist.split <- strsplit(flist, "_")
+                fset.inds <- which(sapply(flist.split, "[", 5) == Species)
+                fset <- flist[fset.inds]
+        } else {
+                fset <- flist
+        }
         raw.list <- lapply(fset, function(x) read.csv(paste(path,x,sep=''),
                                                        header=TRUE))
         refl.list <- lapply(raw.list, function(x) {
