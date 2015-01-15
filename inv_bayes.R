@@ -360,50 +360,13 @@ pinvbayes <- function(obs.spec,
                         	prev.error.0 <- prev.error
                         	ar.alpha.0 <- ar.alpha
 
-							# Original version ------
+							# R version ------
 							
 							# set initial state
 							## input vars are already correct
 							set.seed(g)
-							start.time.1 <- proc.time()
-
-							## Sample alphaN 
-							for (i in 1:nre){
-									guess.alphaN <- alphaN.i
-									guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
-									guess.spec <- prospect(N.i + guess.alphaN[i],
-														   Cab.i + alphaCab.i[i],
-														   Cw.i + alphaCw.i[i],
-														   Cm.i + alphaCm.i[i]
-														   )
-									guess.error <- prev.error
-									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
-									guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
-									prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
-									a <- exp(guess.posterior - prev.posterior)
-									if(is.na(a)) a <- -1
-									if(a > runif(1)){
-											alphaN.i <- guess.alphaN
-											prev.error <- guess.error
-											ar.alpha <- ar.alpha + 1
-									}
-							}
-
-							#  get final state
-                        	alphaN.i.1 <- alphaN.i
-                        	prev.error.1 <- prev.error
-                        	ar.alpha.1 <- ar.alpha
-							stop.time.1 <- proc.time()
-
-							# New version ------
-							
-							# set initial state
-                        	alphaN.i <- alphaN.i.0
-                        	prev.error <- prev.error.0
-                        	ar.alpha <- ar.alpha.0
-							set.seed(g)
 							prev.error.like <- likelihood(prev.error, sd.i) # needs init b/c above blocks do not use it yet
-							start.time.2 <- proc.time()
+							start.time.1 <- proc.time()
 
 							## Sample alphaN 
 							for (i in 1:nre){
@@ -427,6 +390,22 @@ pinvbayes <- function(obs.spec,
 											ar.alpha <- ar.alpha + 1
 									}
 							}
+
+							#  get final state
+                        	alphaN.i.1 <- alphaN.i
+                        	prev.error.1 <- prev.error
+                        	ar.alpha.1 <- ar.alpha
+							stop.time.1 <- proc.time()
+
+							# C version ------
+							
+							# set initial state
+                        	alphaN.i <- alphaN.i.0
+                        	prev.error <- prev.error.0
+                        	ar.alpha <- ar.alpha.0
+							start.time.2 <- proc.time()
+							
+							# run external routines
 
 							#  get final state
                         	alphaN.i.2 <- alphaN.i
