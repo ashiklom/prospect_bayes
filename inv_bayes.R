@@ -330,27 +330,137 @@ pinvbayes <- function(obs.spec,
                 ### Sample random effects ###
 
                 if(random.effects != 'none'){
-                        ## Sample alphaN
-                        for (i in 1:nre){
-                                guess.alphaN <- alphaN.i
-                                guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
-                                guess.spec <- prospect(N.i + guess.alphaN[i],
-                                                       Cab.i + alphaCab.i[i],
-                                                       Cw.i + alphaCw.i[i],
-                                                       Cm.i + alphaCm.i[i]
-                                                       )
-                                guess.error <- prev.error
-                                guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
-                                guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
-                                prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
-                                a <- exp(guess.posterior - prev.posterior)
-                                if(is.na(a)) a <- -1
-                                if(a > runif(1)){
-                                        alphaN.i <- guess.alphaN
-                                        prev.error <- guess.error
-                                        ar.alpha <- ar.alpha + 1
-                                }
-                        }
+
+
+
+                        # KFM: Experimenting with changes to the sample alphaN code block, use the
+						# variable compare_blocks to turn this on/off.
+						#
+						## Round 1: Create duplicate that exactly reproduces the results, taking
+						## care to deal with random values
+
+						compare_blocks = TRUE 
+
+						# Run comparision
+						if (compare_blocks) {
+							
+							# store "input variables" for reuse
+                        	alphaN.i.0 <- alphaN.i
+                        	prev.error.0 <- prev.error
+                        	ar.alpha.0 <- ar.alpha
+
+							# Original version ------
+							
+							# set initial state
+							## input vars are already correct
+							set.seed(g)
+							start.time.1 <- proc.time()
+
+							## Sample alphaN 
+							for (i in 1:nre){
+									guess.alphaN <- alphaN.i
+									guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+									guess.spec <- prospect(N.i + guess.alphaN[i],
+														   Cab.i + alphaCab.i[i],
+														   Cw.i + alphaCw.i[i],
+														   Cm.i + alphaCm.i[i]
+														   )
+									guess.error <- prev.error
+									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
+									guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
+									prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+									a <- exp(guess.posterior - prev.posterior)
+									if(is.na(a)) a <- -1
+									if(a > runif(1)){
+											alphaN.i <- guess.alphaN
+											prev.error <- guess.error
+											ar.alpha <- ar.alpha + 1
+									}
+							}
+
+							#  get final state
+                        	alphaN.i.1 <- alphaN.i
+                        	prev.error.1 <- prev.error
+                        	ar.alpha.1 <- ar.alpha
+							stop.time.1 <- proc.time()
+
+							# New version ------
+							
+							# set initial state
+                        	alphaN.i <- alphaN.i.0
+                        	prev.error <- prev.error.0
+                        	ar.alpha <- ar.alpha.0
+							set.seed(g)
+							start.time.2 <- proc.time()
+
+							## Sample alphaN 
+							for (i in 1:nre){
+									guess.alphaN <- alphaN.i
+									guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+									guess.spec <- prospect(N.i + guess.alphaN[i],
+														   Cab.i + alphaCab.i[i],
+														   Cw.i + alphaCw.i[i],
+														   Cm.i + alphaCm.i[i]
+														   )
+									guess.error <- prev.error
+									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
+									guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
+									prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+									a <- exp(guess.posterior - prev.posterior)
+									if(is.na(a)) a <- -1
+									if(a > runif(1)){
+											alphaN.i <- guess.alphaN
+											prev.error <- guess.error
+											ar.alpha <- ar.alpha + 1
+									}
+							}
+
+							#  get final state
+                        	alphaN.i.2 <- alphaN.i
+                        	prev.error.2 <- prev.error
+                        	ar.alpha.2 <- ar.alpha
+							stop.time.2 <- proc.time()
+
+							# display comparison
+							cat(sprintf('\nIteration: %i\n', g))
+							cat(sprintf('alphaN,i: %i, prev.error: %i, ar.alpha: %i\n',
+							             min(alphaN.i.1==alphaN.i.2), 
+							             min(prev.error.1==prev.error.2), 
+							             min(ar.alpha.1==ar.alpha.2) ))
+							cat(sprintf('original:\n'))
+							print(stop.time.1-start.time.1)
+							cat(sprintf('new:\n'))
+							print(stop.time.2-start.time.2)
+
+						# Don't run comparison, just use the original code
+						} else {
+
+							## Sample alphaN 
+							for (i in 1:nre){
+									guess.alphaN <- alphaN.i
+									guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+									guess.spec <- prospect(N.i + guess.alphaN[i],
+														   Cab.i + alphaCab.i[i],
+														   Cw.i + alphaCw.i[i],
+														   Cm.i + alphaCm.i[i]
+														   )
+									guess.error <- prev.error
+									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
+									guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
+									prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+									a <- exp(guess.posterior - prev.posterior)
+									if(is.na(a)) a <- -1
+									if(a > runif(1)){
+											alphaN.i <- guess.alphaN
+											prev.error <- guess.error
+											ar.alpha <- ar.alpha + 1
+									}
+							}
+						
+						}
+						# KFM: end block coparison
+
+
 
                         ## Sample alphaCab
                         for (i in 1:nre){
