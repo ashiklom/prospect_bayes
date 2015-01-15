@@ -336,13 +336,24 @@ pinvbayes <- function(obs.spec,
                         # KFM: Experimenting with changes to the sample alphaN code block, use the
 						# variable compare_blocks to turn this on/off.
 						#
-						## Round 1: Create duplicate that exactly reproduces the results, taking
+						## Created duplicate that exactly reproduces the results, taking
 						## care to deal with random values
+						#
+						## Only one element of the vector guess.alphaN is used, replaced
+						## with a scalar to avoid resetting on every loop. No sigificant improvement
+						## in speed
+						#
+						## It is not necessary to call the likelihood function for the variable
+						## prev.error. When it is changed it is always set to be equal to
+						## guess.error, and the likelihood function has already been called for
+						## guess.error. Storing the output from likelihood in a few new variables
+						## halves the calls to that function. This changes yields a ~2x speedup. 
 
 						compare_blocks = TRUE 
 
 						# Run comparision
 						if (compare_blocks) {
+						
 							
 							# store "input variables" for reuse
                         	alphaN.i.0 <- alphaN.i
@@ -391,26 +402,28 @@ pinvbayes <- function(obs.spec,
                         	prev.error <- prev.error.0
                         	ar.alpha <- ar.alpha.0
 							set.seed(g)
+							prev.error.like <- likelihood(prev.error, sd.i) # needs init b/c above blocks do not use it yet
 							start.time.2 <- proc.time()
 
 							## Sample alphaN 
 							for (i in 1:nre){
-									guess.alphaN <- alphaN.i
-									guess.alphaN[i] <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
-									guess.spec <- prospect(N.i + guess.alphaN[i],
+									guess.alphaN <- rnorm(1, alphaN.i[i], JumpSD.alpha["N"])
+									guess.spec <- prospect(N.i + guess.alphaN,
 														   Cab.i + alphaCab.i[i],
 														   Cw.i + alphaCw.i[i],
 														   Cm.i + alphaCm.i[i]
 														   )
 									guess.error <- prev.error
 									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
-									guess.posterior <- likelihood(guess.error, sd.i) + dnorm(guess.alphaN[i], 0, sdreN, log=TRUE)
-									prev.posterior <- likelihood(prev.error, sd.i) + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
+									guess.error.like <- likelihood(guess.error, sd.i) # store for reuse
+									guess.posterior <-  guess.error.like + dnorm(guess.alphaN, 0, sdreN, log=TRUE)
+									prev.posterior <- prev.error.like + dnorm(alphaN.i[i], 0, sdreN, log=TRUE)
 									a <- exp(guess.posterior - prev.posterior)
 									if(is.na(a)) a <- -1
 									if(a > runif(1)){
-											alphaN.i <- guess.alphaN
+											alphaN.i[i] <- guess.alphaN
 											prev.error <- guess.error
+											prev.error.like <- guess.error.like # update, without recalculating
 											ar.alpha <- ar.alpha + 1
 									}
 							}
