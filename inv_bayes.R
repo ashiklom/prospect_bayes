@@ -182,6 +182,16 @@ pinvbayes <- function(obs.spec,
                       append=FALSE)
         }
 
+
+		# Special setup needed for new C function
+		dyn.load('prospect_bayes.so') # load functions defined in this library
+		load("data/dataSpec_p4.RData") # load input data, from prospect.R   
+		dataSpec_p4 <- as.matrix(dataSpec_p4) # cont'd 
+		n.a <- dataSpec_p4[,"refractive_index"] # cont'd
+		cab.a <- dataSpec_p4[,"specific_abs_coeff_chl"] # cont'd
+		w.a <- dataSpec_p4[,"specific_abs_coeff_cw"] # cont'd
+		m.a <- dataSpec_p4[,"specific_abs_coeff_cm"] # cont'd
+
         ## MCMC loop
         tstart <- proc.time()
         ar <- 0
@@ -348,24 +358,33 @@ pinvbayes <- function(obs.spec,
 						## guess.error, and the likelihood function has already been called for
 						## guess.error. Storing the output from likelihood in a few new variables
 						## halves the calls to that function. This changes yields a ~2x speedup. 
+						##
+						## Implemented the code block in C, taking care that the results re exactly
+						## equivalent. This yelds an additional ~1.5x speedup.
 
-						compare_blocks = TRUE 
+						compare_blocks <- TRUE 
 
 						# Run comparision
 						if (compare_blocks) {
+
+							# init
+							prev.error.like <- likelihood(prev.error, sd.i) 
+							randeff.ind = cumsum(unlist(lapply(randeff.list, function(x) length(x))))
+							randeff.ind = as.integer(c(0, randeff.ind))							
 						
 							
 							# store "input variables" for reuse
-                        	alphaN.i.0 <- alphaN.i
-                        	prev.error.0 <- prev.error
-                        	ar.alpha.0 <- ar.alpha
+                        	alphaN.i.0 <- alphaN.i+1-1
+                        	prev.error.0 <- prev.error+1-1
+                        	ar.alpha.0 <- ar.alpha+1-1
+							prev.error.like.0 <- prev.error.like+1-1
+
 
 							# R version ------
 							
 							# set initial state
 							## input vars are already correct
 							set.seed(g)
-							prev.error.like <- likelihood(prev.error, sd.i) # needs init b/c above blocks do not use it yet
 							start.time.1 <- proc.time()
 
 							## Sample alphaN 
@@ -376,7 +395,7 @@ pinvbayes <- function(obs.spec,
 														   Cw.i + alphaCw.i[i],
 														   Cm.i + alphaCm.i[i]
 														   )
-									guess.error <- prev.error
+									guess.error <- prev.error+1-1
 									guess.error[,randeff.list[[i]]] <- spec.error(guess.spec, obs.spec[, randeff.list[[i]]])
 									guess.error.like <- likelihood(guess.error, sd.i) # store for reuse
 									guess.posterior <-  guess.error.like + dnorm(guess.alphaN, 0, sdreN, log=TRUE)
@@ -392,26 +411,37 @@ pinvbayes <- function(obs.spec,
 							}
 
 							#  get final state
-                        	alphaN.i.1 <- alphaN.i
-                        	prev.error.1 <- prev.error
-                        	ar.alpha.1 <- ar.alpha
+                        	alphaN.i.1 <- alphaN.i+1-1
+                        	prev.error.1 <- prev.error+1-1
+                        	ar.alpha.1 <- ar.alpha+1-1
 							stop.time.1 <- proc.time()
+
 
 							# C version ------
 							
 							# set initial state
-                        	alphaN.i <- alphaN.i.0
-                        	prev.error <- prev.error.0
-                        	ar.alpha <- ar.alpha.0
+							set.seed(g)
+                        	alphaN.i <- alphaN.i.0+1-1
+                        	prev.error <- prev.error.0+1-1
+                        	ar.alpha <- ar.alpha.0+1-1
+							prev.error.like <- prev.error.like.0+1-1
 							start.time.2 <- proc.time()
 							
 							# run external routines
-
+							.Call('sample_alpha_n', 
+									nre, nwl, nspec,
+									alphaN.i, alphaCab.i, alphaCw.i, alphaCm.i, JumpSD.alpha["N"],
+									N.i, Cab.i, Cw.i, Cm.i, 
+									n.a, cab.a, w.a, m.a,
+									prev.error, randeff.ind, obs.spec,
+									sd.i, sdreN, prev.error.like, ar.alpha)
+							
 							#  get final state
-                        	alphaN.i.2 <- alphaN.i
-                        	prev.error.2 <- prev.error
-                        	ar.alpha.2 <- ar.alpha
+                        	alphaN.i.2 <- alphaN.i+1-1
+                        	prev.error.2 <- prev.error+1-1
+                        	ar.alpha.2 <- ar.alpha+1-1
 							stop.time.2 <- proc.time()
+							
 
 							# display comparison
 							cat(sprintf('\nIteration: %i\n', g))
@@ -423,6 +453,11 @@ pinvbayes <- function(obs.spec,
 							print(stop.time.1-start.time.1)
 							cat(sprintf('new:\n'))
 							print(stop.time.2-start.time.2)
+
+							# reset to R version outputs
+                        	alphaN.i <- alphaN.i.1
+                        	prev.error <- prev.error.1
+                        	ar.alpha <- ar.alpha.1
 
 						# Don't run comparison, just use the original code
 						} else {

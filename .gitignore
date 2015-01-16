@@ -6,3 +6,5 @@
 profile/
 *.swp
 *~
+*.o
+*.so
