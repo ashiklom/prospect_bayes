@@ -6,10 +6,10 @@
 ## [2] Number of iterations
 ## [3] Folder
 
-NG=10000
-FD="FFT_individuals_0203"
+NG=50000
+FD="FFT_individuals_0320"
 
 while read l; do
         echo $l
         nimble_run.sh $l $NG $FD
-done < FFT_runspec.txt
+done < ../data/spectra_list_FFT.txt

@@ -1,6 +1,5 @@
 ##' Functions for converting spectral data into matrices for use in Bayesian inversion.
 
-library(reshape2)
 library(data.table)
 
 ##' @name specmatrix
@@ -25,8 +24,8 @@ specmatrix <- function(species,
                        ){
         print(sprintf("Loading %s ...", species))
         path <- switch(spectype,
-                       SE = "../data/SE_spectra/Reflectance",
-                       FFT = "../data/FFT_spectra/NASA_FFT_LC_Refl_Spectra_v4.csv")
+                       SE = "data/SE_spectra/Reflectance",
+                       FFT = "data/FFT_spectra/NASA_FFT_LC_Refl_Spectra_v4.csv")
         if(spectype=="FFT"){
                 ## FFT spectra
                 filter.spec <- FALSE

@@ -3,3 +3,5 @@
 .RData
 .dat
 .qlog
+run_results
+FFT_spectra

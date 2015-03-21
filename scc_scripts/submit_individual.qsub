@@ -39,18 +39,16 @@ echo "Current directory : $(pwd)"
 echo "Current job ID : $JOB_ID"
 echo "Current job name : $JOB_NAME"
 echo "Task index number : $SGE_TASK_ID"
-echo "Species : $SPECIES"
-echo "Random effect : $REF"
+echo "Spectra : $SPECTRA"
 echo "Iterations : $NGIBBS"
-echo "Inits : $INITS"
 echo "Folder : $FOLDER"
 echo "Run : $RUN"
 echo "=========================================================="
 
 # Run the R scripts
-# Arguments to runpi.R: Species random_effects sampled_inits ngibbs otherID folder
+# Arguments to invert_individual.R: Spectra ngibbs folder ID
 
-Rscript runpi.R $SPECIES $REF $INITS $NGIBBS $RUN $FOLDER &
+Rscript runpi.R $SPECTRA $NGIBBS $FOLDER $RUN &
 
 wait
 
