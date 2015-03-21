@@ -11,6 +11,7 @@
 ##    [7] Filename tag to identify run results
 ##    [8] Sub-folder in "run_results" for storing output.
 
-touch run_results/testfolder/empty
-rm run_results/testfolder/*
-Rscript scripts/runpi.R 0.05 Oats 1 leaf random 100 test1 testfolder
+touch ../run_results/testfolder/empty
+rm ../run_results/testfolder/*
+cd ../R
+Rscript runpi.R 0.05 FFT.ACRU 1 leaf_FFT random 50 test1 testfolder
