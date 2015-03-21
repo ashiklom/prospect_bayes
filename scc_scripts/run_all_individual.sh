@@ -11,5 +11,5 @@ FD="FFT_individuals_0320"
 
 while read l; do
         echo $l
-        nimble_run.sh $l $NG $FD
+        run_individual.sh $l $NG $FD
 done < ../data/spectra_list_FFT.txt
