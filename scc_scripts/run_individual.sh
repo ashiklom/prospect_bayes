@@ -9,7 +9,7 @@ module load R/R-3.1.1
 
 SPECARG=$1
 NGIBBSARG=${2:-1000}
-FOLDARG=${3:-testfolder}
+FOLDARG=${3:-FFT_unlabeled}
 
 qsub -v SPECTRA=$SPECARG,NGIBBS=$NGIBBSARG,FOLDER=$FOLDARG,RUN=01 -N "pbi $SPECARG $FOLDARG $RUN" submit_individual.qsub
 qsub -v SPECTRA=$SPECARG,NGIBBS=$NGIBBSARG,FOLDER=$FOLDARG,RUN=02 -N "pbi $SPECARG $FOLDARG $RUN" submit_individual.qsub

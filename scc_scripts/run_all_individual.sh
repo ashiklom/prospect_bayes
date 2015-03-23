@@ -6,8 +6,8 @@
 ## [2] Number of iterations
 ## [3] Folder
 
-NG=50000
-FD="FFT_individuals_0320"
+NG=$1
+FD=$2
 
 while read l; do
         echo $l
