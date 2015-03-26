@@ -31,7 +31,6 @@
 
 # Now let's keep track of some information just in case anything goes wrong
 
-cd ../R
 echo "=========================================================="
 echo "Starting on : $(date)"
 echo "Running on node : $(hostname)"
@@ -48,7 +47,7 @@ echo "=========================================================="
 # Run the R scripts
 # Arguments to invert_individual.R: Spectra ngibbs folder ID
 
-Rscript runpi.R $SPECTRA $NGIBBS $FOLDER $RUN &
+Rscript invert_individual.R $SPECTRA $NGIBBS $FOLDER $RUN &
 
 wait
 
