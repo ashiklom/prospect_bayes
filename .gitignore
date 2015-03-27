@@ -5,3 +5,4 @@
 .qlog
 run_results
 FFT_spectra
+*.qlog
