@@ -25,7 +25,7 @@ run_id <- args[4]
 
 filename <- sprintf("../run_results/%s/%s_%s.dat",
                     folder,
-                    spectra,
+                    species,
                     run_id)
 dir.create(sprintf("../run_results/%s", folder), recursive=TRUE, showWarnings = FALSE)
 

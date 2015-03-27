@@ -3,7 +3,7 @@
 # Run this file using 'qsub species_run.qsub'
 #
 # All lines starting with "#$" are SGE qsub commands
-#
+# 
 
 # Specify which shell to use
 #$ -S /bin/bash
@@ -31,7 +31,6 @@
 
 # Now let's keep track of some information just in case anything goes wrong
 
-cd ../R
 echo "=========================================================="
 echo "Starting on : $(date)"
 echo "Running on node : $(hostname)"
@@ -39,15 +38,16 @@ echo "Current directory : $(pwd)"
 echo "Current job ID : $JOB_ID"
 echo "Current job name : $JOB_NAME"
 echo "Task index number : $SGE_TASK_ID"
-echo "Species : $SPEC"
+echo "Spectra : $SPECIES"
+echo "Iterations : $NGIBBS"
 echo "Folder : $FOLDER"
 echo "Run : $RUN"
 echo "=========================================================="
 
 # Run the R scripts
-# Arguments to R script: "Spectra name" "iterations" "Folder name" "Run ID"
+# Arguments to invert_species.R: Species ngibbs folder ID
 
-R --vanilla --args $SPEC $NGIBBS $FOLDER $RUN < nimble/prospectinv_nimble.R &
+Rscript invert_species.R $SPECIES $NGIBBS $FOLDER $RUN &
 
 wait
 
