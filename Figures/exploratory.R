@@ -5,16 +5,22 @@ library(GGally)
 load("data/FFT_full.Rdata")
 
 ## Remove unknowns from analysis
-fft <- fft.spec[]
+bad.label <- "UNKN1"
+bad.pft <- c("Grass", "Shrub", NA)
+fft <- fft.spec[Label != bad.label][PFT != bad.pft]
+
 
 ## Traits by PFT
+pft.plot <- ggplot(fft) + aes(x=Height) + facet_wrap("PFT", scales = "free_y")
+pft.plot + aes(y=N.mu) + stat_summary(fun.data="mean_cl_boot", geom="pointrange", aes(group=1)) +
+        stat_summary(fun.data=median, geom="line", aes(group=1))
 ggplot(fft.spec) + aes(x=PFT, y=N.mu, col=PFT) + geom_boxplot()
 ggplot(fft.spec) + aes(x=PFT, y=Cab.mu, col=PFT) + geom_boxplot()
 ggplot(fft.spec) + aes(x=PFT, y=Cw.mu, col=PFT) + geom_boxplot()
 ggplot(fft.spec) + aes(x=PFT, y=Cm.mu, col=PFT) + geom_boxplot()
 
 ## Trends by canopy position
-ggplot(fft.spec) + aes(x=PFT, y=N, col=Height) + geom_violin()
+ggplot(fft.spec) + aes(x=PFT, y=N, col=Height) + geom_violin() + geom_line(stat="median")
 ggplot(fft.spec) + aes(x=PFT, y=Cab, col=Height) + geom_violin()
 ggplot(fft.spec) + aes(x=PFT, y=Cw, col=Height) + geom_violin()
 ggplot(fft.spec) + aes(x=PFT, y=Cm, col=Height) + geom_violin()
