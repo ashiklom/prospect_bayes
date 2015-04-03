@@ -4,11 +4,14 @@ library(ggplot2)
 library(GGally)
 load("data/FFT_full.Rdata")
 
+## Remove unknowns from analysis
+fft <- fft.spec[]
+
 ## Traits by PFT
-ggplot(fft.spec) + aes(x=PFT, y=N, col=PFT) + geom_violin()
-ggplot(fft.spec) + aes(x=PFT, y=Cab, col=PFT) + geom_violin()
-ggplot(fft.spec) + aes(x=PFT, y=Cw, col=PFT) + geom_violin()
-ggplot(fft.spec) + aes(x=PFT, y=Cm, col=PFT) + geom_violin()
+ggplot(fft.spec) + aes(x=PFT, y=N.mu, col=PFT) + geom_boxplot()
+ggplot(fft.spec) + aes(x=PFT, y=Cab.mu, col=PFT) + geom_boxplot()
+ggplot(fft.spec) + aes(x=PFT, y=Cw.mu, col=PFT) + geom_boxplot()
+ggplot(fft.spec) + aes(x=PFT, y=Cm.mu, col=PFT) + geom_boxplot()
 
 ## Trends by canopy position
 ggplot(fft.spec) + aes(x=PFT, y=N, col=Height) + geom_violin()
