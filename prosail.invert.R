@@ -1,5 +1,4 @@
-source.path <- "~/Documents/Unsynced/pecan/modules/rtm/R/prosail.R"
-source(source.path)
+library(PEcAnRTM)
 
 ## Sail parameters
 #param.order <- c("N", "Cab", "Car", "Cbrown", "Cw", "Cm",
@@ -156,3 +155,4 @@ for(l in 1:nrow(pm.car)){
     inv.car[[l]] <- ch
 }
 save(inv.car, file="inv.car.Rdata")
+
