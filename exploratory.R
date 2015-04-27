@@ -3,14 +3,8 @@ library(data.table)
 library(ggplot2)
 library(GGally)
 library(reshape2)
-load("data/FFT_full.Rdata")
-
-## Remove unknowns from analysis
-bad.label <- "UNKN1"
-bad.pft <- c("Grass", "Shrub", NA)
-fft <- fft.spec[!(Label %in% bad.label)]
-fft <- fft[!(PFT %in% bad.pft)]
-fft.bl <- fft[Con_vs_BL == "BL"]
+if(grepl("Figures", getwd())) setwd("..")
+source("Figures/preprocess.fft.R")
 
 # Setup plot themes and colors for consistency
 theme_set(theme_bw(base_size=20))
@@ -36,7 +30,12 @@ water <- ggplot(fft) + aes(x=Cw.mu, y=EWT_g_cm2) +
         ylab("Measured directly") +
         ggtitle("Equivalent water thickness (cm)")
 
-water + ylim(0,0.04) + aes(size=Cw.sd/Cw.mu, col=Con_vs_BL) + geom_point()
+water.all <- water + 
+        ylim(0,0.04) + 
+        aes(size=Cw.sd/Cw.mu, col=Con_vs_BL) + 
+        geom_point()
+
+water.byspec <- water + ylim(0,0.04) + facet_wrap("Label")
 
 water.fit <- lm(EWT_g_cm2 ~ Cw.mu, data=fft.bl)
 wb <- water.fit$coefficients[1]
