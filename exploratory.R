@@ -4,7 +4,7 @@ library(ggplot2)
 library(GGally)
 library(reshape2)
 if(grepl("Figures", getwd())) setwd("..")
-source("Figures/preprocess.fft.R")
+source("preprocess.fft.R")
 
 # Setup plot themes and colors for consistency
 theme_set(theme_bw(base_size=20))

@@ -46,7 +46,7 @@ pmn.1 <- inv.pmin
 obs.1 <- pro4sail(par.1, cst.1)
 
 ## Invert with different initial conditions
-ng <- 4000
+ng <- 1000
 inv.1.low <- invert.sail(obs.1, inv.s.low, cst.1, ng, 
                          inv.priors, inv.pmin, pro4sail)
 inv.1.mid <- invert.sail(obs.1, inv.s.mid, cst.1, ng, 

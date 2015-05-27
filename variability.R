@@ -1,13 +1,13 @@
 ### Variability
 library(rjags)
-library(data.table)
-load("data/FFT_full.Rdata")
-fft.spec <- fft.spec[!is.na(Spectra) & !is.na(PFT)]
-design.reg <- model.matrix(N ~ Height + PFT + Label, data=fft.spec)
+source("preprocess.fft.R")
+design.reg <- model.matrix(N.mu ~ Height + PFT + Label + Site + Plot,
+                           data=fft.h)
+
 burnin <- 5000
 nchains <- 1
-thin <- 1
-niter <- 5000 * thin / nchains
+nthin <- 1
+ngibbs <- 5000 * nthin / nchains
 vcode <- "
 model{
         ### Hierarchical random-effect, global mean
@@ -23,11 +23,11 @@ model{
 "
 vdata <- list(X = design.reg,
               nfe = ncol(design.reg),
-              n.all = nrow(fft.spec))
-vdata$y.m <- fft.spec[,N]
+              n.all = nrow(fft.h))
+vdata$y.m <- fft.spec[,N.mu]
 vmodel <- jags.model(file = textConnection(vcode),
                      data = vdata,
                      n.chains = nchains)
 update(vmodel, burnin)
 monitors <- c("Beta", "tau")
-z <- system.time(vsamples <- coda.samples(vmodel, monitors, niter, thin))
+z <- system.time(vsamples <- coda.samples(vmodel, monitors, ngibbs, nthin))

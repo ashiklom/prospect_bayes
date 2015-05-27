@@ -34,3 +34,6 @@ fft[, factor(Label, levels=label.order)]
 fft.t <- fft[succession != "nontree"]
 fft.h <- fft[plant.type == "hardwood"]
 fft.c <- fft[plant.type == "conifer"]
+
+## Remove unnecessary variables
+rm(bad.label, bad.pft, fft.full, fft.sp, fft.spec)
