@@ -1,7 +1,7 @@
 ### Calculate RMSE
 library(PEcAnRTM)
 
-source("preprocess.fft.R")
+source("../preprocess.fft.R")
 
 # Load transmittance data
 trans.path <- file.path("~", "Documents", "Dropbox",
