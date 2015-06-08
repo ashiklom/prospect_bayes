@@ -68,17 +68,29 @@ refl.path <- file.path("~", "Documents", "Dropbox",
                         "NASA_FFT_LC_Refl_Spectra_v4.csv")
 refl <- fread(refl.path, header=TRUE)
 
-#' Calculate reflectance error
-th.mr <- theme_bw() + theme(axis.title.y = element_blank())
-re.all <- error.plot(fft, refl, 1) + ggtitle("All") + ylab("Reflectance error")
-re.h <- error.plot(fft.h, refl, 1) + ggtitle("Hardwood") + th.mr
-re.c <- error.plot(fft.c, refl, 1) + ggtitle("Conifer") + th.mr
+#' Calculate reflectance and transmittance error
+re.all.raw <- error.plot(fft, refl, 1)
+re.h.raw <- error.plot(fft.h, refl, 1)
+re.c.raw <- error.plot(fft.c, refl, 1)
+te.all.raw <- error.plot(fft, trans, 2)
+te.h.raw <- error.plot(fft.h, trans, 2)
+te.c.raw <- error.plot(fft.c, trans, 2)
 
-#' Calculate transmittance error
-te.all <- error.plot(fft, trans, 2) + ggtitle("All") + ylab("Transmittance error")
-te.h <- error.plot(fft.h, trans, 2) + ggtitle("Hardwood") + th.mr
-te.c <- error.plot(fft.c, trans, 2) + ggtitle("Conifer") + th.mr
-
+#' Modify plots
+th.all <- theme_bw() +
+    theme(text = element_text(size=11),
+          axis.text = element_text(size=rel(0.6)),
+          axis.title = element_text(size=rel(0.8)),
+          plot.margin = unit(c(0.15, 0.15, 0.15, 0.15), "lines"))
+th.mr <- theme(axis.title.y = element_blank()) 
+re.ylims <- ylim(-0.05, 0.12)
+te.ylims <- ylim(-0.28, 0.16)
+re.all <- re.all.raw + ggtitle("All") + ylab("Reflectance error (Model - Obs.)") + th.all + re.ylims
+re.h <- re.h.raw + ggtitle("Hardwood") + th.all + th.mr + re.ylims
+re.c <- re.c.raw + ggtitle("Conifer") + th.all + th.mr + re.ylims
+te.all <- te.all.raw + ylab("Transmittance error (Model - Obs.)") + th.all + te.ylims
+te.h <- te.h.raw + th.all + th.mr + te.ylims
+te.c <- te.c.raw + th.all + th.mr + te.ylims
 png.plot("manuscript/figures/refltrans-validation.png", w=6, h=6)
 grid.arrange(re.all, re.h, re.c, te.all, te.h, te.c, nrow=2)
 dev.off()
