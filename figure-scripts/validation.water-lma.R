@@ -2,12 +2,11 @@
 
 setwd("..")
 source("preprocess.fft.R")
+source("figure-scripts/common.R")
 
 ## Plot
 library(ggplot2)
 library(gridExtra)
-
-succ.colors <- scale_color_manual(values = c("green3", "blue", "red"))
 
 ## Global settings
 th.global <- theme_bw() + 
@@ -20,9 +19,6 @@ th.global <- theme_bw() +
           legend.key.width = unit(0.7, "lines"),
           plot.margin = unit(c(0.4, 0.4, 0.4, 0.4), "lines")
           )
-png.plot <- function(fname, h=4, w=4, ...){
-    png(fname, height=h, width=w, res=300, units="in", ...)
-}
 
 ## Water content
 water.base <- ggplot() + aes(x=EWT_g_cm2, y=Cw.mu) + 
