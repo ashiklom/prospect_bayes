@@ -4,10 +4,12 @@ library(data.table)
 library(PEcAnRTM)
 library(coda)
 library(ggplot2)
+library(GGally)
 library(gridExtra)
 library(gtable)
 library(data.table)
 library(reshape2)
+library(MASS)
 
 ## Set paths
 path.db <- file.path("~", "Documents", "Dropbox")
@@ -29,49 +31,22 @@ for(i in 1:4) plot(ss[,i], type='l')
 bt <- seq(10000, 20000)
 samps <- ss[bt,]
 sdat <- data.table(samps)
+sdat[, Cw := Cw * 1000][, Cm := Cm * 1000]
 
 #' Density plots
-th.dens <- theme_bw()
-dvar <- ggplot(sdat) + geom_density() + th.dens
-dplot <- ggplot(sdat) + 
-    stat_density2d(aes(fill=..level..), geom="polygon", color="black") +
-    scale_fill_continuous(low="white", high="red") +
-    guides(fill=FALSE) +
-    th.dens
-#dplot <- ggplot(sdat) + geom_point(size=1)
-lim.N <- sdat[, c(min(N), max(N))]
-d1 <- dvar + aes(x=N) + xlim(lim.N)
-d2 <- dvar + aes(x=Cab)
-d3 <- dvar + aes(x=Cw)
-d4 <- dvar + aes(x=Cm) + coord_flip()
-d12 <- dplot + aes(x=N, y=Cab) + xlim(lim.N)
-d13 <- dplot + aes(x=N, y=Cw)
-d14 <- dplot + aes(x=N, y=Cm)
-d23 <- dplot + aes(x=Cab, y=Cw)
-d24 <- dplot + aes(x=Cab, y=Cm)
-d34 <- dplot + aes(x=Cw, y=Cm)
-blank2 <- grid.rect(gp=gpar(col="white"))
-blank <- rectGrob()
-
-d1g <- ggplot_gtable(ggplot_build(d1))
-d2g <- ggplot_gtable(ggplot_build(d2))
-d12g <- ggplot_gtable(ggplot_build(d12))
-mat.lay <- matrix(list(d1g, blank, blank, blank,
-             d12g, d2g, blank, blank),
-             nrow=2, byrow=TRUE)
-g <- gtable_matrix("try1", mat.lay, widths=rep(1,4), heights=rep(1,2))
-plot(g)
-
-
-d1g <- ggplotGrob(d1)
-d12g <- ggplotGrob(d12)
-g <- gtable:::rbind_gtable(d1g, blank, blank d12g, "first")
-grid.newpage()
-grid.draw(g)
-
-grid.arrange(d1, blank, blank, blank,
-             d12, d2, blank, blank,
-             d13, d23, d3, blank,
-             d14, d24, d34, d4,
-             nrow=4)
-
+densfunc <- function(x,y,...){
+    require(RColorBrewer)
+    z <- kde2d(x, y, n=50)
+    nlev <- 6
+    my.cols <- rev(brewer.pal(nlev, "RdYlBu"))
+    points(x, y, col="darkgrey", pch=".")
+    contour(z, drawlabels=FALSE, nlevels=nlev, col="black", add=TRUE)
+}
+png.plot("manuscript/figures/parameter-covariance.png", h=4, w=4)
+pairs(sdat[,1:4,with=F], 
+      upper.panel=NULL, 
+      lower.panel=densfunc, 
+      labels = c("N", "Cab", "Cw\n(x1000)", "Cm\n(x1000)"),
+      cex.axis = 0.8,
+      mar=c(0, 0, 0, 0))
+dev.off()
