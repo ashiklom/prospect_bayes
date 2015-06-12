@@ -40,9 +40,11 @@ form <- function(d,x) formula(sprintf(form.list[d], x))
 # }}}
 
 # {{{ Run models
-mod.fft <- lapply(p.vars, function(x) lm(form('a',x), data=fft))
-mod.fft.h <- lapply(p.vars, function(x) lm(form('h',x), data=fft.h))
-mod.fft.c <- lapply(p.vars, function(x) lm(form('c',x), data=fft.c))
+#mod.fft <- lapply(p.vars, function(x) lm(form('a',x), data=fft))
+#mod.fft.h <- lapply(p.vars, function(x) lm(form('h',x), data=fft.h))
+#mod.fft.c <- lapply(p.vars, function(x) lm(form('c',x), data=fft.c))
+#save(mod.fft, mod.fft.h, mod.fft.c, file="data/anovas.RData")
+load("data/anovas.RData")
 # }}}
 
 # {{{ Dictionary and labeller
@@ -66,17 +68,6 @@ var.colors <- c('Plant type' = 'darkgreen',
                 'Needle age' = 'orange',
                 'Residuals' = 'grey')
 # }}}
-# {{{ Themes
-th.global <- theme_bw() +
-    theme(text = element_text(size=11),
-          axis.text = element_text(size=7),
-          axis.title = element_text(size=9),
-          legend.text = element_text(size=8),
-          legend.title = element_text(size=10))
-th.nox <- theme(axis.title.x = element_blank())
-th.noy <- theme(axis.title.y = element_blank())
-# }}}
-
 # {{{ Plot function
 anova.plot <- function(mod){
     require(ggplot2)
@@ -94,11 +85,22 @@ anova.plot <- function(mod){
     plt <- ggplot(dat, aes(x=variable, y=value, fill=vars)) +
         geom_bar(stat="identity") +
         scale_fill_manual(values = cols) +
-        labs(x = "PROSPECT parameter", y = "Fraction of\nvariance explained")
+        labs(x = "PROSPECT parameter", y = "Frac. of variance explained")
     return(plt)
 }
 # }}}
 
+# {{{ Themes
+th.global <- theme_bw() +
+    theme(text = element_text(size=11),
+          axis.text = element_text(size=7),
+          axis.title = element_text(size=9),
+          legend.text = element_text(size=8),
+          legend.title = element_text(size=10),
+          plot.margin = unit(c(0.05, 0.05, 0.05, 0.05), "in"))
+th.nox <- theme(axis.title.x = element_blank())
+th.noy <- theme(axis.title.y = element_blank())
+# }}}
 # {{{ Generate plots
 aov.all.l <- anova.plot(mod.fft) + th.global + 
     guides(fill = guide_legend(title="Predictor",
@@ -106,12 +108,14 @@ aov.all.l <- anova.plot(mod.fft) + th.global +
                                title.hjust=0.5,
                                direction="horizontal",
                                nrow=2))
-aov.all <- aov.all.l + th.global + guides(fill=FALSE) + th.nox + th.noy
-aov.h <- anova.plot(mod.fft.h) + th.global + guides(fill=FALSE) + th.nox
-aov.c <- anova.plot(mod.fft.c) + th.global + guides(fill=FALSE) + th.noy
+aov.all <- aov.all.l + th.global + guides(fill=FALSE) + xlab("All")
+aov.h <- anova.plot(mod.fft.h) + th.global + guides(fill=FALSE) + xlab("Hardwood") + th.noy
+aov.c <- anova.plot(mod.fft.c) + th.global + guides(fill=FALSE) + xlab("Conifer") + th.noy
 all.legend <- get_legend(aov.all.l)
-png.plot("manuscript/figures/variance-decomposition.png", h=4, w=4)
-grid.arrange(arrangeGrob(aov.all, aov.h, aov.c, all.legend,
-                         heights=c(1,1,1,0.5),ncol=1))
+png.plot("manuscript/figures/variance-decomposition.png", h=3, w=5)
+grid.arrange(arrangeGrob(aov.all, aov.h, aov.c, widths=c(1.2,1,1), nrow=1),
+             all.legend, heights=c(1, 0.3), ncol=1)
 dev.off()
 # }}}
+
+# vim: set foldlevel=0:

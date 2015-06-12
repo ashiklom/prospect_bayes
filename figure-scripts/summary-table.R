@@ -54,10 +54,16 @@ setnames(sum.hc, c("dat", "succession", vars), c("Plant type", "Succession", var
 
 out.caption <- "
 Summary of inversion estiamtes of PROSPECT parameters.
-Values are reported as median (95\\% CI)
+Values are reported as mean (95\\% CI)
 "
 out.caption <- gsub("\\n", " ", out.caption)
 out.tab <- xtable(sum.hc, caption=out.caption, label="tab:summary")
 
-print(out.tab, file="manuscript/tables/summary-table.tex", include.rownames=F,
-      sanitize.colnames.function=identity, size="small")
+out.tab.pre <- print(out.tab, file="", 
+      include.rownames=F,
+      sanitize.colnames.function=identity, 
+      size="small")
+out.tab.post <- gsub("(\\{\\\\small)", "\\\\centerline\\{\\1", out.tab.pre)
+out.tab.post <- gsub("(\\\\end\\{tabular\\}\\n)", "\\1\\}", out.tab.post)
+
+cat(out.tab.post, file="manuscript/tables/summary-table.tex")
