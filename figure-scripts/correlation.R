@@ -14,147 +14,92 @@ pvars <- c('N.mu', 'Cab.mu', 'Cw.mu', 'Cm.mu')
 cor.vars <- c("Perc_N", "Perc_C", "CNRatio",
                   "EWT_g_cm2", "LMA_g_DW_cm2", "SAMPLE_dN15", "ADF_PERC_DW",
                   "ADL_PERC_DW", "CELL_PERC_DW")
+succ.levels <- c("early", "mid", "late")
+p.label <- list( "N.mu" = "N", "Cab.mu" = "Cab", "Cw.mu" = "Cw", "Cm.mu" = "Cm")
+v.label <- list('Perc_N' = 'Perc N', 'Perc_C' = 'Perc C', 'CNRatio' = 'CN Ratio',
+    'EWT_g_cm2' = 'EWT', 'LMA_g_DW_cm2' = 'LMA', 'SAMPLE_dN15' = 'dN15',
+    'ADF_PERC_DW' = 'ADF', 'ADL_PERC_DW' = 'ADL', 'CELL_PERC_DW' = 'Cellulose')
+col.pal <- c("green2", "blue", "red")
 # }}}
 
-# {{{ Function to extract values of interest
-get.lm <- function(dat){
-    dalist <- list()
-    dslist <- list()
+# {{{ Plot function
+plot.lm <- function(dat, pp){
+    par(pp)
+    pp <- par(mfcol=c(length(cor.vars), length(pvars)), 
+          mar=c(0.2,0.2,0.2,0.2), cex.axis=0.8)
+    dat[, succession := factor(succession, levels=succ.levels)]
     for(p in pvars){
         for(v in cor.vars){
+            col1 <- p == pvars[1]
+            rown <- v == cor.vars[length(cor.vars)]
             pv <- paste(p, v)
             f.basic <- sprintf("%s ~ %s", v, p)
             f.succ <- sprintf("%s ~ succession * %s", v, p)
-            dalist[[pv]] <- lm(f.basic, data=dat)
-            dslist[[pv]] <- lm(f.succ, data=dat)
+            mod.basic <- lm(f.basic, data=dat)
+            mod.succ <- lm(f.succ, data=dat)
+            aic.basic <- AIC(mod.basic)
+            aic.succ <- AIC(mod.succ)
+            if(aic.succ < aic.basic){
+                modsum <- summary(mod.succ)
+                if(col1 && rown)
+                    plot(x=dat[[p]], y=dat[[v]], col=col.pal[dat[,succession]],
+                         pch=20, cex=0.2)
+                else if (col1)
+                    plot(x=dat[[p]], y=dat[[v]], col=col.pal[dat[,succession]],
+                         pch=20, cex=0.2, xaxt='n')
+                else if (rown)
+                    plot(x=dat[[p]], y=dat[[v]], col=col.pal[dat[,succession]],
+                         pch=20, cex=0.2, yaxt='n')
+                else
+                    plot(x=dat[[p]], y=dat[[v]], col=col.pal[dat[,succession]],
+                         pch=20, cex=0.2, xaxt='n', yaxt='n')
+                for(s in succ.levels){
+                    dat.sub <- dat[succession==s,]
+                    mod.sub <- lm(f.basic, data=dat.sub)
+                    cf <- summary(mod.sub)$coefficients
+                    if(all(cf[,4] < 0.05)) abline(coef=cf[,1], col=col.pal[match(s,succ.levels)])
+                }
+            } else {
+                modsum <- summary(mod.basic)
+                if(col1 && rown)
+                    plot(x=dat[[p]], y=dat[[v]], 
+                         pch=20, cex=0.2)
+                else if (col1)
+                    plot(x=dat[[p]], y=dat[[v]], 
+                         pch=20, cex=0.2, xaxt='n')
+                else if (rown)
+                    plot(x=dat[[p]], y=dat[[v]], 
+                         pch=20, cex=0.2, yaxt='n')
+                else
+                    plot(x=dat[[p]], y=dat[[v]], 
+                         pch=20, cex=0.2, xaxt='n', yaxt='n')
+                cf <- modsum$coefficients
+                if(all(cf[,4] < 0.05)) abline(coef=cf[,1])
+            }
+            if(col1) mtext(v.label[[v]], side=2, cex=0.7, line=2)
+            if(rown) mtext(p.label[[p]], side=1, cex=0.7, line=2)
         }
     }
-    dasum <- lapply(dalist, summary)
-    dssum <- lapply(dslist, summary)
-    dacoefs <- data.frame(lapply(dasum, '[[', 'coefficients'))
-    dscoefs <- data.frame(lapply(dssum, '[[', 'coefficients'))
-    dacoefs$varname <- rownames(dacoefs)
-    dscoefs$varname <- rownames(dscoefs)
-    dacoefs$varname <- gsub("N\\.mu", "x", dacoefs$varname)
-    dscoefs$varname <- gsub("N\\.mu", "x", dscoefs$varname)
-    dscoefs$varname <- gsub("(.*)", "succ_\\1", dscoefs$varname)
-    damelt <- melt(dacoefs, id.vars="varname")
-    dsmelt <- melt(dscoefs, id.vars="varname") 
-    var.rxp <- "((N|Cab|Cw|Cm)\\.mu)\\.(.*?)\\.+(.*)"
-    damelt$pvar <- gsub(var.rxp, "\\2", damelt$variable)
-    damelt$cvar <- gsub(var.rxp, "\\3", damelt$variable)
-    damelt$pc <- gsub(var.rxp, "\\1 \\3", damelt$variable)
-    damelt$param <- gsub(var.rxp, "\\4", damelt$variable)
-    dsmelt$pvar <- gsub(var.rxp, "\\2", dsmelt$variable)
-    dsmelt$cvar <- gsub(var.rxp, "\\3", dsmelt$variable)
-    dsmelt$pc <- gsub(var.rxp, "\\1 \\3", dsmelt$variable)
-    dsmelt$param <- gsub(var.rxp, "\\4", dsmelt$variable)
-    dacast <- data.table(dcast(damelt, varname + pvar + cvar + pc ~ param))
-    dscast <- data.table(dcast(dsmelt, varname + pvar + cvar + pc ~ param))
-
-    dar2 <- sapply(dasum, '[[', 'r.squared')
-    dar2.dt <- data.table(rsquare=dar2, index=names(dar2))
-    daaic <- sapply(dalist, AIC)
-    daaic.dt <- data.table(aic=daaic, index=names(daaic))
-    setkey(dar2.dt, index)
-    setkey(daaic.dt, index)
-    setkey(dacast, pc)
-    dacast <- dacast[dar2.dt][daaic.dt]
-
-    dsr2 <- sapply(dssum, '[[', 'r.squared')
-    dsr2.dt <- data.table(rsquare=dsr2, index=names(dsr2))
-    dsaic <- sapply(dslist, AIC)
-    dsaic.dt <- data.table(aic=dsaic, index=names(dsaic))
-    setkey(dsr2.dt, index)
-    setkey(dsaic.dt, index)
-    setkey(dscast, pc)
-    dscast <- dscast[dsr2.dt][dsaic.dt]
-
-    dat <- rbind(dacast, dscast)
-    dat[grep("succ", varname), modtype := "succession"]
-    dat[is.na(modtype), modtype := "basic"]
-
-    setnames(dat, c("Pr...t..", "Std..Error"), c("p.value", "SE"))
-
-    return(dat)
 }
 # }}}
-
-hdat <- get.lm(fft.h)
-hdat[, plant.type := "hardwood"]
-cdat <- get.lm(fft.c)
-cdat[, plant.type := "conifer"]
-dat <- rbind(hdat, cdat)
-datm <- melt(dat1, measure.vars=c('Estimate', 'p.value', 'SE', 't.value', 'rsquare', 'aic'))
-datc <- dcast(datm, pvar + cvar + pc + plant.type ~ varname + variable)
-
-alpha <- 0.05
-dat[p.value < 0.05, rsquare2 := rsquare]
-
-plt <- ggplot(dat, aes(x=pvar, y=cvar, fill=rsquare2)) + 
-    geom_tile(color="black") + 
-    facet_grid(plant.type ~ modtype) +
-    scale_fill_gradient(low="white", high="red")
-plot(plt)
-
-
-
-
-
-
-
-#' Labeller for parameters
-pvars.label <- list( "N.mu" = "N", "Cab.mu" = "Cab", "Cw.mu" = "Cw", "Cm.mu" = "Cm")
-cor.vars.label <- list('Perc_N' = 'Perc N', 'Perc_C' = 'Perc C', 'CNRatio' = 'CN Ratio',
-    'EWT_g_cm2' = 'EWT', 'LMA_g_DW_cm2' = 'LMA', 'SAMPLE_dN15' = 'dN15',
-    'ADF_PERC_DW' = 'ADF', 'ADL_PERC_DW' = 'ADL', 'CELL_PERC_DW' = 'Cellulose')
-vars.labeller <- function(variable, value) {
-    if(variable == "cor.var") return(cor.vars.label[value])
-    else if(variable == "pvar") return(pvars.label[value])
+# {{{ Draw plots
+pp0 <- list(omi=c(0.4, 0.4, 0.7, 0.1), cex.main=2)
+leg <- function() {
+    pp <<- par(usr=c(0,1,0,1), xpd=NA)
+    legend(-2.1, 10.5, succ.levels, 
+           col=col.pal, lty=1, horiz=TRUE)
 }
-
-
-fft.cor.vars <- c(pvars, cor.vars)
-cor.plot <- function(dat){
-    fft.cor <- dat[, fft.cor.vars, with=F]
-    cor.all <- data.table(cor(fft.cor, use="pairwise.complete.obs"))
-    cor.all$var1 <- colnames(cor.all)
-    setcolorder(cor.all, c("var1", fft.cor.vars))
-    cor.melt <- melt(cor.all, id.vars="var1")
-    cor.melt <- cor.melt[variable %in% pvars,][!(var1 %in% pvars),]
-    c1 <- ggplot(cor.melt) + aes(x=variable, y=var1, fill=value) +
-        geom_tile() + 
-        scale_fill_gradient2(low="red", mid="white", high="green") +
-            xlab("Prospect parameter") +
-            ylab("Measured variable")
-    return(c1)
-}
-
-cor.all <- cor.plot(fft) + ggtitle("All")
-cor.h <- cor.plot(fft.h) + ggtitle("Hardwood")
-cor.c <- cor.plot(fft.c) + ggtitle("Conifer")
-
-pairs.plot <- function(dat){
-    dat.m1 <- melt(dat, measure.vars=pvars, variable.name="pvar", value.name="pval")
-    dat.m2 <- melt(dat.m1, measure.vars=cor.vars, variable.name="cor.var", value.name="cor.val")
-    plt <- ggplot(dat.m2) + 
-        aes(x=pval, y=cor.val) +
-        geom_point(size=0.8) +
-        facet_grid(cor.var ~ pvar, scales="free", labeller=vars.labeller) +
-        stat_smooth(method="lm", se=FALSE, fullrange=FALSE, size=1)
-    return(plt)
-}
-#
-theme.pairs <- theme_bw() + 
-    theme(text = element_text(size=10),
-          axis.text = element_text(size=rel(0.6)),
-          strip.text = element_text(size=rel(0.7)),
-          axis.title.y = element_blank())
-fft.c.sub <- fft.c[EWT_g_cm2 < 0.1,][N.mu < 5,]
-pairs.h <- pairs.plot(fft.h) + aes(color=succession) + xlab("Hardwood") + theme.pairs + succ.colors +
-    guides(color=FALSE)
-pairs.c <- pairs.plot(fft.c.sub) + aes(color=succession) + xlab("Conifer") + theme.pairs + succ.colors
-png.plot(fname="manuscript/figures/correlation.png", h=7, w=9)
-grid.arrange(arrangeGrob(pairs.h, pairs.c, nrow=1, widths=c(1,1.3)))
+png.plot("manuscript/figures/correlation-hardwood.png", h=6, w=4)
+pp <- pp0
+plot.lm(fft.h, pp)
+title("Hardwood", outer=TRUE, line=3)
+leg()
 dev.off()
+png.plot("manuscript/figures/correlation-conifer.png", h=6, w=4)
+pp <- pp0
+plot.lm(fft.c[EWT_g_cm2 < 0.1,], pp)
+title("Conifer", outer=TRUE, line=3)
+leg()
+dev.off()
+# }}}
 
