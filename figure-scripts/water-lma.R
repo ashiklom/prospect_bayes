@@ -85,3 +85,37 @@ grid.arrange(arrangeGrob(lma.all),
              ncol=1)
 dev.off()
 
+# Error statistic table {{{
+rmse <- function(mod, obs){
+  nx <- min(sum(!is.na(mod)), sum(!is.na(obs)))
+  rmse <- sqrt(sum((mod - obs)^2, na.rm=TRUE) / nx)
+  bias <- mean(mod - obs, na.rm=TRUE)
+  sepc <- sqrt(sum((mod - obs - bias)^2, na.rm=TRUE) / nx)
+  cv <- sepc / mean(mod, na.rm=TRUE)
+  rmspe <- sqrt(sum((mod/obs - 1)^2, na.rm=TRUE) / nx)
+  out <- c("RMSE"=rmse, "BIAS"=bias, "SEPC"=sepc, "CV"=cv, "RMSPE"=rmspe)
+  return(out)
+}
+datlist <- list(All=fft, Hardwood=fft.h, Conifer=fft.c)
+rmse.water <- sapply(datlist, function(x) x[, rmse(Cw.mu, EWT_g_cm2)])
+rmse.lma <- sapply(datlist, function(x) x[, rmse(Cm.mu, LMA_g_DW_cm2)])
+
+rmse.table <- data.table(Variable = rep(c("EWT (g/cm2)", "LMA (g/cm2)"), each=5),
+                         Statistic = c(rownames(rmse.water), rownames(rmse.lma)),
+                         rbind(rmse.water, rmse.lma))
+rmse.table[c(1,2,4,5,6,7,9,10), Variable := ""]
+# }}}
+
+# Prepare xtable {{{
+library(xtable)
+cap <- "
+Error statistics for equivalent water thickness (EWT) and leaf mass per unit area (LMA)
+model estimates compared to inversion.
+"
+cap <- gsub("\\n", " ", cap)
+out.tab <- xtable(rmse.table, caption=cap, digits=-3, label="tab:water-lma-error")
+out.tab.pre <- print(out.tab, file="", include.rownames=FALSE)
+out.tab.post <- out.tab.pre
+cat(out.tab.post, file="manuscript/tables/water-lma-error.tex")
+# }}}
+
