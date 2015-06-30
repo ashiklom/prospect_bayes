@@ -8,7 +8,7 @@ source("figure-scripts/common.R")
 vars <- c('N', 'Cab', 'Cw', 'Cm')
 vars.mu <- paste0(vars, '.mu')
 
-# {{{ Summarize function
+# Summarize function {{{
 summarize <- function(datn, succ=TRUE){
     dat <- get(datn)
     if(succ){
