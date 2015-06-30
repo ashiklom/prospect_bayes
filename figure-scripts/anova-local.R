@@ -118,4 +118,15 @@ grid.arrange(arrangeGrob(aov.all, aov.h, aov.c, widths=c(1.2,1,1), nrow=1),
 dev.off()
 # }}}
 
+#' Extract coefficients subset
+get.coefs <- function(mod, param){
+    modsum <- summary(mod)
+    mod.c <- modsum$coefficients
+    getvals <- grep(param, rownames(mod.c))
+    vals <- mod.c[getvals,]
+    return(vals)
+}
+h.height <- lapply(mod.fft.h, get.coefs, "Height")
+c.height <- lapply(mod.fft.c, get.coefs, "Height")
+
 # vim: set foldlevel=0:
