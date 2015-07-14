@@ -26,13 +26,16 @@ simspec <- function(means, vars, n=5000){
     vpars <- ln.sigma(means,vars)
     samps <- rlnorm(n, mpars, vpars)
     params <- matrix(samps, n, 5, byrow=TRUE)
+    params[,1] <- params[,1] + 1    # N is lognormally distributed, but offset by 1
     spec <- apply(params, 1, prospect, version=5)
     return(spec)
 }
     
 # Hardwood summary stats
 # From Feret et al 2011 RSE 
-mean.h <- c(1.7, 32.81, 8.51, 0.0129, 0.0077)
+# NOTE: N has a minimum at 1, so the mean value is actually 1
+#   greater than the value here.
+mean.h <- c(0.7, 32.81, 8.51, 0.0129, 0.0077)
 var.h <- c(0.6, 17.87, 3.2, 0.0073, 0.0035)^2
 
 # Conifer summary stats
@@ -42,11 +45,11 @@ var.h <- c(0.6, 17.87, 3.2, 0.0073, 0.0035)^2
 #       (set to SD = range/2)
 # Cab (2), Car (3) 
 #   From Di Vittorio 2009 RSE 113:948-1966
-mean.c <- c(2.6, 68.6, 12.1, 0.001, 0.035)
-var.c <- c(2.5, 11.9, 40, 0.02, 0.025)^2
+mean.c <- c(1.6, 68.6, 12.1, 0.001, 0.035)
+var.c <- c(2.5, 11.9, 2.52, 0.02, 0.025)^2
 
 # Run simulations
-n = 5000
+n <- 5000
 spec.h <- simspec(mean.h, var.h, n)
 pn.h <- apply(spec.h, 2, parnir)
 
