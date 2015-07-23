@@ -1,0 +1,18 @@
+#!/bin/bash -l
+#$ -S /bin/bash -cwd -j y -o log.qlog -l h_rt=10:00:00 
+#$ -q "geo*"
+
+echo "=========================================================="
+echo "Starting on : $(date)"
+echo "Running on node : $(hostname)"
+echo "Current directory : $(pwd)"
+echo "Spectra : $spectra"
+echo "Iterations : $ngibbs"
+echo "Sensor : $sensor"
+echo "=========================================================="
+
+Rscript real-inversion.R $spectra $ngibbs $sensor
+
+echo "=========================================================="
+echo "Finished on : $(date)"
+echo "=========================================================="

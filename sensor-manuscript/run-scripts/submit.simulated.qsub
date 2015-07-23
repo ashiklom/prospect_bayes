@@ -1,0 +1,21 @@
+#!/bin/bash -l
+#$ -S /bin/bash -cwd -j y -o log.qlog -l h_rt=10:00:00 
+#$ -q "geo*"
+
+echo "=========================================================="
+echo "Starting on : $(date)"
+echo "Running on node : $(hostname)"
+echo "Current directory : $(pwd)"
+echo "Parameters :  $N $Cab $Car $Cw $Cm"
+echo "Sensor : $sensor"
+echo "Iterations : $ngibbs"
+echo "Run name : $runname"
+echo "=========================================================="
+
+module load R/3.2.0
+Rscript simulated-inversion.R $N $Cab $Car $Cw $Cm\
+    $sensor $runname $ngibbs
+
+echo "=========================================================="
+echo "Finished on : $(date)"
+echo "=========================================================="
