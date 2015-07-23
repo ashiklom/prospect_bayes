@@ -5,5 +5,5 @@ all.spec <- fread(FFT.path, header=TRUE)
 spec.list <- all.spec[, Spectra]
 
 write.table(spec.list, file="fft-speclist.dat",
-            row.names=FALSE, col.names=FALSE)
+            row.names=FALSE, col.names=FALSE, quote=FALSE)
 

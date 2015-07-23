@@ -38,6 +38,9 @@ samples <- invert.slow(observed = obs,
 
 #' Export and save
 run.name <- sprintf("%s.%s", spectra, sensor)
-assign(run.name, list(spectra, start.params, sensor, samples))
-save(list = run.name, file=sprintf("../results/%s.RData", run.name)
+assign(run.name, list(spectra=spectra,
+                      inits=start.params,
+                      sensor=sensor,
+                      samples=samples))
+save(list = run.name, file=sprintf("../results/%s.RData", run.name))
 
