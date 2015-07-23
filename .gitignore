@@ -7,5 +7,5 @@
 run_results
 FFT_spectra
 *.qlog
-data/design-mat
 Rprof.out
+data
