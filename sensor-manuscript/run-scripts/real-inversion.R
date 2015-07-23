@@ -2,7 +2,7 @@
 #' Arguments: spectra ngibbs sensor
 
 library(PEcAnRTM)
-options(warn=2)
+#options(warn=2)
 
 #' Parse arguments
 args <- commandArgs(trailingOnly=TRUE)
