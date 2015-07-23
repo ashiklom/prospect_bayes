@@ -13,7 +13,8 @@ sensor <- args[3]
 #' Load data
 FFT.path <- "../../data/FFT_spectra/FFT_spectra_unique.csv"
 all.spec <- fread(FFT.path, header=TRUE)
-obs <- as.matrix(as.numeric(all.spec[Spectra == spectra, 72:2172, with=FALSE])) 
+obs.spec <- as.matrix(as.numeric(all.spec[Spectra == spectra, 72:2172, with=FALSE])) 
+obs <- spectral.response(obs.spec, sensor)
 
 #' Setup inversion parameters
 parnames <- c("N", "Cab", "Car", "Cw", "Cm")
