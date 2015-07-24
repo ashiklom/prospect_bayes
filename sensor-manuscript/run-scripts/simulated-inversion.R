@@ -1,7 +1,7 @@
-#' Arguments: N, Cab, Car, Cw, Cm, sensor, run.name ngibbs
+#' Arguments: N, Cab, Car, Cw, Cm, sensor, ngibbs, run.name
 if(exists("TEST")) {
     arg <- c(1.4, 30, 8.5, 0.01, 0.008, 
-             "aviris.classic", "testrun", 1000)
+             "aviris.classic", 500, "testrun")
 } else {
     arg <- commndArgs(trailingOnly=TRUE)
 }
@@ -11,8 +11,8 @@ parnames <- c("N", "Cab", "Car", "Cw", "Cm")
 true.params <- as.numeric(arg[1:5])
 names(true.params) <- parnames
 sensor <- arg[6]
-run.name <- arg[7]
-ngibbs <- as.numeric(arg[8])
+ngibbs <- as.numeric(arg[7])
+run.name <- arg[8]
 
 #' Set up inversion parameters
 require(PEcAnRTM)
@@ -47,6 +47,6 @@ if(exists("TEST")){
         abline(v = true.params[i], col="red")
     }
 } else {
-    save(list=run.name, file=paste0(run.name,".RData"))
+    save(list=run.name, file=sprintf("../results-simulation/%s.RData", run.name))
 }
 

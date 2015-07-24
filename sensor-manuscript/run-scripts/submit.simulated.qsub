@@ -13,8 +13,7 @@ echo "Run name : $runname"
 echo "=========================================================="
 
 module load R/3.2.0
-Rscript simulated-inversion.R $N $Cab $Car $Cw $Cm\
-    $sensor $runname $ngibbs
+Rscript simulated-inversion.R $N $Cab $Car $Cw $Cm $sensor $ngibbs $runname
 
 echo "=========================================================="
 echo "Finished on : $(date)"
