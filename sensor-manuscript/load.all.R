@@ -2,12 +2,14 @@
 
 parnames <- c("N", "Cab", "Car", "Cw", "Cm", "residual")
 
-results.path <- "results"
-flist.full <- list.files(results.path)
+results.path <- "results.identity"
+flist.full <- list.files(results.path, ".*.RData")
 results.list <- list()
 for(f in flist.full){
 # Extract data
-    load(f)
+    print(f)
+    f.path <- file.path(results.path, f)
+    load(f.path)
     f.name <- gsub("(.*)[.]RData", "\\1", f)
     f.list <- get(f.name)
     rm(list=f.name)
