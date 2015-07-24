@@ -1,11 +1,5 @@
 .Rproj.user
 .Rhistory
-.RData
-.Rdata
 .dat
 .qlog
-run_results
-FFT_spectra
-*.qlog
 Rprof.out
-data
