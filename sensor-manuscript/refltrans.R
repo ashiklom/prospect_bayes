@@ -3,31 +3,31 @@
 library(PEcAnRTM)
 library(ggplot2)
 library(gridExtra)
+library(grid)
 
-if(grepl("figure-scripts", getwd())) setwd("..")
-source("preprocess.fft.R")
-source("figure-scripts/common.R")
+load("../data/FFT.processed.RData")
+source("../figure.common.R")
 # }}}
 
 # Error matrix function {{{
 error.matrix <- function(dat.mod, dat.obs, refltrans=2, relative=FALSE){
     wl.names <- sprintf("Wave_%d", 400:2500)
-    d.names <- names(dat.mod)
+    d.names <- names(dat.obs)
     d.names <- d.names[!(grepl("Wave_", d.names))]
-    d.names[d.names %in% names(dat.mod)]
+    #d.names <- d.names[d.names %in% names(dat.mod)]
     setkey(dat.mod, Sample_Name, Sample_Year)
     setkey(dat.obs, Sample_Name, Sample_Year)
     rt.big <- dat.mod[dat.obs]
     tdiff <- function(mrow){
-        pars <- mrow[1:4]
-        obs <- mrow[-4:0]
+        pars <- mrow[1:5]
+        obs <- mrow[-5:0]
         if(any(is.na(pars))) return(rep(NA,2101))
-        tmodel <- prospect(pars,4)[,refltrans]
+        tmodel <- prospect(pars,5)[,refltrans]
         tdiff <- tmodel - obs
         if(relative) tdiff <- tdiff / tmodel
         return(tdiff)
     }
-    rt.mat <- as.matrix(rt.big[,c("N.mu", "Cab.mu", "Cw.mu", "Cm.mu", wl.names), with=FALSE])
+    rt.mat <- as.matrix(rt.big[,c("N.mu", "Cab.mu", "Car.mu", "Cw.mu", "Cm.mu", wl.names), with=FALSE])
     trans.mat <- matrix(NA, nrow(rt.big), 2101)
     for(i in 1:nrow(rt.big)){
         trans.mat[i,] <- tdiff(rt.mat[i,])
@@ -61,7 +61,8 @@ error.plot <- function(err.mat){
 
 # Load data {{{ 
 #' Load transmittance data
-trans.path <- file.path("~", "Documents", "Dropbox",
+dropbox.path <- "/mnt/dropbox"
+trans.path <- file.path(dropbox.path,
                         "NASA_TE_PEcAn-RTM_Project",
                         "Data", "Spectra",
                         "NASA_FFT_Spectra",
@@ -72,13 +73,9 @@ remove.negatives <- function(x){
     return(x)
 }
 trans <- trans[, lapply(.SD, remove.negatives)]
-# Remove transmittance data with negative values in visible
-transmat <- as.matrix(trans[,-(1:71), with=F])
-bad.trans <- which(apply(trans.mat[,1:1901], 1, function(x) any(x < 0)))
-trans <- trans[-bad.trans,]
 
 # Load reflectance data
-refl.path <- file.path("~", "Documents", "Dropbox",
+refl.path <- file.path(dropbox.path,
                         "NASA_TE_PEcAn-RTM_Project",
                         "Data", "Spectra",
                         "NASA_FFT_Spectra",
@@ -87,26 +84,20 @@ refl <- fread(refl.path, header=TRUE)
 # }}}
 
 # Calculate reflectance and transmittance error {{{ 
-#fft <- fft[plant.type %in% c("hardwood", "conifer"),]
-#rem.all.raw <- error.matrix(fft, refl, 1)
-#rem.h.raw <- error.matrix(fft.h, refl, 1)
-#rem.c.raw <- error.matrix(fft.c, refl, 1)
-#tem.all.raw <- error.matrix(fft, trans, 2)
-#tem.h.raw <- error.matrix(fft.h, trans, 2)
-#tem.c.raw <- error.matrix(fft.c, trans, 2)
-#remr.all.raw <- error.matrix(fft, refl, 1, relative=TRUE)
-#remr.h.raw <- error.matrix(fft.h, refl, 1, relative=TRUE)
-#remr.c.raw <- error.matrix(fft.c, refl, 1, relative=TRUE)
-#temr.all.raw <- error.matrix(fft, trans, 2, relative=TRUE)
-#temr.h.raw <- error.matrix(fft.h, trans, 2, relative=TRUE)
-#temr.c.raw <- error.matrix(fft.c, trans, 2, relative=TRUE)
-#save(rem.all.raw, rem.h.raw, rem.c.raw,
-     #tem.all.raw, tem.h.raw, tem.c.raw,
-     #remr.all.raw, remr.h.raw, remr.c.raw,
-     #temr.all.raw, temr.h.raw, temr.c.raw,
-     #file="data/refltrans-error.RData")
+fft <- fft.f[plant.type %in% c("hardwood", "conifer"),]
+rem.all.raw <- error.matrix(fft, refl, 1)
+rem.h.raw <- error.matrix(fft.h, refl, 1)
+rem.c.raw <- error.matrix(fft.c, refl, 1)
+tem.all.raw <- error.matrix(fft, trans, 2)
+tem.h.raw <- error.matrix(fft.h, trans, 2)
+tem.c.raw <- error.matrix(fft.c, trans, 2)
+remr.all.raw <- error.matrix(fft, refl, 1, relative=TRUE)
+remr.h.raw <- error.matrix(fft.h, refl, 1, relative=TRUE)
+remr.c.raw <- error.matrix(fft.c, refl, 1, relative=TRUE)
+temr.all.raw <- error.matrix(fft, trans, 2, relative=TRUE)
+temr.h.raw <- error.matrix(fft.h, trans, 2, relative=TRUE)
+temr.c.raw <- error.matrix(fft.c, trans, 2, relative=TRUE)
 
-load("data/refltrans-error.RData")
 re.all.raw <- error.plot(rem.all.raw)
 re.h.raw <- error.plot(rem.h.raw)
 re.c.raw <- error.plot(rem.c.raw)
