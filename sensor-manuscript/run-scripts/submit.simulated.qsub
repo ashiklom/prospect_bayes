@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 #$ -S /bin/bash -cwd -j y -o log.qlog -l h_rt=10:00:00 
 #$ -q "geo*"
 
