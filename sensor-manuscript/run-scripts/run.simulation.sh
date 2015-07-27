@@ -1,5 +1,4 @@
 #!/bin/bash
-module load R/3.2.0
 qsub -V -v N=1.068680,Cab=28.006041,Car=6.323790,Cw=0.003950,Cm=0.000455,sensor=aviris.ng,ngibbs=50000,runname=N1.q1.aviris.ng -N "N1.q1.aviris.ng" submit.simulated.qsub
 qsub -V -v N=1.068680,Cab=34.441551,Car=8.146921,Cw=0.005441,Cm=0.001599,sensor=aviris.ng,ngibbs=50000,runname=N1.q2.aviris.ng -N "N1.q2.aviris.ng" submit.simulated.qsub
 qsub -V -v N=1.068680,Cab=41.880575,Car=9.643089,Cw=0.007752,Cm=0.003155,sensor=aviris.ng,ngibbs=50000,runname=N1.q3.aviris.ng -N "N1.q3.aviris.ng" submit.simulated.qsub
