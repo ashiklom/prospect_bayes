@@ -17,7 +17,7 @@ PATH.data.FFT.d15N = file.path(PATH.data.FFT, "NASA_FFT_d15N_ANALYZED_DATA_UPDAT
 PATH.data.FFT.lignin = file.path(PATH.data.FFT, "NASA_FFT_FIB_LIG_CELL_RESULTS_FINAL_4R.csv")
 PATH.data.FFT.CN = file.path(PATH.data.FFT, "NASA_FFT_Project_CN_Data_4R.csv")
 PATH.data.FFT.SLA_LMA = file.path(PATH.data.FFT, "NASA_FFT_SLA_LMA_Data_v2_4R_updated_new.csv")
-PATH.results <- "data/fft.dat.RData"
+PATH.results <- "data/fft.dat.sensor.RData"
 
 ### Read data
 FFT.d15N <- read.csv(PATH.data.FFT.d15N, header=TRUE, stringsAsFactors = FALSE)
@@ -88,4 +88,4 @@ setkey(fftdat, "Label")
 setkey(species.info, "Label")
 uk <- unique(c(fftdat[,Label], species.info[,Label]))
 fft.full <- fftdat[species.info[J(uk)]]
-save(fft.full, file="data/FFT_full.RData")
+save(fft.full, file="data/FFT_full_sensor.RData")

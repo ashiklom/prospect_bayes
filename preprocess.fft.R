@@ -1,5 +1,5 @@
 library(data.table)
-load("data/FFT_full.RData")
+load("data/FFT_full_sensor.RData")
 
 ## Fix needle age
 fft.full[Age=="T", Age := NA]
@@ -32,9 +32,9 @@ type.order <- c("grass", "shrub", "conifer", "hardwood")
 fft.f[, plant.type := factor(plant.type, levels=type.order)]
 pft.order <- unique(fft.f[order(as.integer(succession), 
                               as.integer(plant.type)), PFT])
-fft.f$PFT <- fft.f[, factor(PFT, levels=pft.order)]
+fft.f[, PFT := factor(PFT, levels=pft.order)]
 label.order <- unique(fft.f[order(as.integer(PFT)), Label])
-fft.f[, factor(Label, levels=label.order)]
+fft.f[, Label := factor(Label, levels=label.order)]
 
 ## Set type-specific data.tables
 fft.f <- fft.f[succession != "nontree"]
@@ -42,4 +42,4 @@ fft.h <- fft.f[plant.type == "hardwood"]
 fft.c <- fft.f[plant.type == "conifer"]
 
 ## Save
-save(fft.f, fft.h, fft.c, file="data/FFT.processed.RData")
+save(fft.f, fft.h, fft.c, file="data/FFT.processed.sensor.RData")
