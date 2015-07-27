@@ -98,9 +98,12 @@ rmse.melt <- melt(rmse.table, id.vars=c("plant.type", "sensor", "param"), variab
 # }}}
 
 # Sensor response plots {{{
-rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value) +
-    facet_wrap("stat", scales="free_y") + geom_bar(stat="identity")
+rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value, fill=plant.type) +
+    facet_wrap(stat~param, scales="free") + geom_bar(stat="identity", position="dodge") +
+    theme(text = element_text(size=6), axis.text.x = element_text(angle=90, hjust=1))
+png.plot("fft-error-by-sensor.png", 5, 5)
 plot(rmse.plot)
+dev.off()
 # }}}
 
 # Prepare xtable {{{
