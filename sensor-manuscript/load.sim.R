@@ -2,7 +2,7 @@
 
 parnames <- c("N", "Cab", "Car", "Cw", "Cm", "residual")
 
-results.path <- "results"
+results.path <- "results-simulation"
 flist.full <- list.files(results.path, ".*.RData")
 results.list <- list()
 for(f in flist.full){
@@ -13,9 +13,10 @@ for(f in flist.full){
     f.name <- gsub("(.*)[.]RData", "\\1", f)
     f.list <- get(f.name)
     rm(list=f.name)
-    sensor <- f.list$sensor
+    sensor <- list(sensor = f.list$sensor)
     samples <- f.list$samples
-    spectra <- f.list$spectra
+    true.param <- as.list(f.list$true.param)
+    names(true.param) <- sprintf("%s.true", parnames[1:5])
 
 # Burn in and thin
     ngibbs <- nrow(samples)
@@ -35,9 +36,9 @@ for(f in flist.full){
     names(med) <- sprintf("%s.med", parnames)
     q975 <- apply(samples.sub, 2, quantile, 0.975, na.rm=TRUE)
     names(q975) <- sprintf("%s.q975", parnames)
-    dat.row <- c(list(spectra = spectra, 
-                      sensor = sensor,
-                      fname = f.name),
+    dat.row <- c(true.param = true.param,
+                 sensor = sensor,
+                 fname = f.name,
                  as.list(mu), as.list(sigma),
                  as.list(q25), as.list(med),
                  as.list(q975))
@@ -47,4 +48,4 @@ for(f in flist.full){
 #' Combine into data.table
 library(data.table)
 fft.dat <- do.call(rbindlist, list(results.list)) 
-save(fft.dat, file="../data/fft.dat.sensor.RData")
+save(fft.dat, file="../data/simulation.dat.RData")
