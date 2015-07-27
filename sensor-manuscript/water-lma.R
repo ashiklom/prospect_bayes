@@ -1,14 +1,7 @@
 #' Validation plot based on Water and LMA
+source("../figure.common.R")
 
-setwd("..")
-source("preprocess.fft.R")
-source("figure-scripts/common.R")
-
-## Plot
-library(ggplot2)
-library(gridExtra)
-
-## Global settings
+# Global theme {{{
 th.global <- theme_bw() + 
     theme(text = element_text(size=10),
           axis.title = element_text(size=rel(1)),
@@ -19,8 +12,9 @@ th.global <- theme_bw() +
           legend.key.width = unit(0.7, "lines"),
           plot.margin = unit(c(0.4, 0.4, 0.4, 0.4), "lines")
           )
+# }}}
 
-## Water content
+# Water content plot {{{
 water.base <- ggplot() + aes(x=EWT_g_cm2, y=Cw.mu) + 
         geom_point(size=1) + 
         geom_abline(linetype="dashed") + 
@@ -30,7 +24,7 @@ water.base <- ggplot() + aes(x=EWT_g_cm2, y=Cw.mu) +
         th.global +
         theme(legend.position="right",
               legend.margin=unit(0, "lines"))
-water.all <- water.base %+% fft.t + aes(color=plant.type) +
+water.all <- water.base %+% fft.f + aes(color=plant.type) +
         guides(color = guide_legend(title="Plant type",
                                     title.position="top")) +
         annotate("text", x=0, y=0.11, label="(a)", size=4)
@@ -45,14 +39,14 @@ water.c <- water.base %+% fft.c + aes(color=succession) +
         guides(color = guide_legend(title="Succession",
                                     title.position="top")) +
         theme(axis.title.y = element_blank())
-png.plot("manuscript/figures/water.png", h=4, w=6)
+png.plot("figures/water.png", h=4, w=6)
 grid.arrange(arrangeGrob(water.all),
              arrangeGrob(water.h, water.c, nrow=1, widths=c(1,1.4)),
              nrow=2)
 dev.off()
+# }}}
 
-
-## LMA
+# LMA plot {{{
 lma.base <- ggplot() + aes(x=LMA_g_DW_cm2, y=Cm.mu) + 
         geom_point(size=1) + 
         geom_abline(linetype="dashed") + 
@@ -62,7 +56,7 @@ lma.base <- ggplot() + aes(x=LMA_g_DW_cm2, y=Cm.mu) +
         th.global +
         theme(legend.position="right",
               legend.margin=unit(0, "lines"))
-lma.all <- lma.base %+% fft.t + aes(color=plant.type) +
+lma.all <- lma.base %+% fft.f + aes(color=plant.type) +
         guides(color = guide_legend(title="Plant type",
                                     title.position="top")) +
         annotate("text", x=0, y=0.082, label="(a)", size=4)
@@ -79,11 +73,12 @@ lma.c <- lma.base %+% fft.c + aes(color=succession) +
                                     title.position="top")) +
         annotate("text", x=0.002, y=0.08, label="(c)", size=4)
         theme(axis.title.y = element_blank())
-png.plot("manuscript/figures/lma.png", h=4, w=6) 
+png.plot("figures/lma.png", h=4, w=6) 
 grid.arrange(arrangeGrob(lma.all),
              arrangeGrob(lma.h, lma.c, nrow=1, widths=c(1,1.4)),
              ncol=1)
 dev.off()
+# }}}
 
 # Error statistic table {{{
 rmse <- function(mod, obs){
@@ -93,17 +88,19 @@ rmse <- function(mod, obs){
   sepc <- sqrt(sum((mod - obs - bias)^2, na.rm=TRUE) / nx)
   cv <- sepc / mean(mod, na.rm=TRUE)
   rmspe <- sqrt(sum((mod/obs - 1)^2, na.rm=TRUE) / nx)
-  out <- c("RMSE"=rmse, "BIAS"=bias, "SEPC"=sepc, "CV"=cv, "RMSPE"=rmspe)
+  out <- list(RMSE=rmse, BIAS=bias, SEPC=sepc, CV=cv, RMSPE=rmspe)
   return(out)
 }
-datlist <- list(All=fft, Hardwood=fft.h, Conifer=fft.c)
-rmse.water <- sapply(datlist, function(x) x[, rmse(Cw.mu, EWT_g_cm2)])
-rmse.lma <- sapply(datlist, function(x) x[, rmse(Cm.mu, LMA_g_DW_cm2)])
+rmse.water <- fft.spec[, rmse(Cw.mu, EWT_g_cm2), by=c("plant.type", "sensor")][,param := "EWT"]
+rmse.lma <- fft.spec[, rmse(Cm.mu, LMA_g_DW_cm2), by=c("plant.type", "sensor")][,param := "LMA"]
+rmse.table <- rbind(rmse.water, rmse.lma)
+rmse.melt <- melt(rmse.table, id.vars=c("plant.type", "sensor", "param"), variable.name="stat")
+# }}}
 
-rmse.table <- data.table(Variable = rep(c("EWT (g/cm2)", "LMA (g/cm2)"), each=5),
-                         Statistic = c(rownames(rmse.water), rownames(rmse.lma)),
-                         rbind(rmse.water, rmse.lma))
-rmse.table[c(1,2,4,5,6,7,9,10), Variable := ""]
+# Sensor response plots {{{
+rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value) +
+    facet_wrap("stat", scales="free_y") + geom_bar(stat="identity")
+plot(rmse.plot)
 # }}}
 
 # Prepare xtable {{{
