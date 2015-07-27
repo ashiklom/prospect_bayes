@@ -3,7 +3,7 @@ if(exists("TEST")) {
     arg <- c(1.4, 30, 8.5, 0.01, 0.008, 
              "aviris.classic", 500, "testrun")
 } else {
-    arg <- commndArgs(trailingOnly=TRUE)
+    arg <- commandArgs(trailingOnly=TRUE)
 }
 
 #' Extract arguments
@@ -36,7 +36,10 @@ samples <- invert.slow(observed = obs,
                        do.mle = TRUE,
                        quiet = TRUE)
 
-assign(run.name, list(true.params, start.params, sensor, samples))
+assign(run.name, list(true.params = true.params, 
+                      inits = start.params,
+                      sensor = sensor, 
+                      samples = samples))
 
 if(exists("TEST")){
     par(mfrow = c(5,2))
