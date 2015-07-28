@@ -1,0 +1,64 @@
+# Parameter saturation analysis
+
+# Load packages {{{
+library(data.table)
+library(ggplot2)
+library(reshape2)
+load("../data/simulation.dat.RData")
+# }}}
+
+# Parse and format data {{{
+run.regex <- "(.*)[.](q[1-7])[.](.*)"
+fft.dat[, par.level := gsub(run.regex, "\\1", fname)]
+fft.dat[, q.level := gsub(run.regex, "\\2", fname)]
+par.regex <- "(N|Cab|Car|Cw|Cm)([1-7])"
+fft.dat[, par.vary := gsub(par.regex, "\\1", par.level)]
+fft.dat[, par.lnum := gsub(par.regex, "\\2", par.level)]
+setnames(fft.dat, "sensor.sensor", "sensor")
+sensor.order <- c("identity", "aviris.ng", "aviris.classic", "hyperion",
+                  "chris.proba", "landsat5", "landsat7", "landsat8", "viirs",
+                  "modis", "avhrr")
+fft.dat[, sensor := factor(sensor, levels=sensor.order)]
+fft.dat <- fft.dat[!is.na(sensor)]
+# }}}
+
+# Get relative uncertainty {{{
+fft.dat[, N.rsd := N.sigma / N.mu]
+fft.dat[, Cab.rsd := Cab.sigma / Cab.mu]
+fft.dat[, Car.rsd := Car.sigma / Car.mu]
+fft.dat[, Cw.rsd := Cw.sigma / Cw.mu]
+fft.dat[, Cm.rsd := Cm.sigma / Cm.mu]
+fft.dat[, N.cv := (N.mu - true.param.N.true)/true.param.N.true]
+fft.dat[, Cab.cv := (Cab.mu - true.param.Cab.true)/true.param.Cab.true]
+fft.dat[, Car.cv := (Car.mu - true.param.Car.true)/true.param.Car.true]
+fft.dat[, Cw.cv := (Cw.mu - true.param.Cw.true)/true.param.Cw.true]
+fft.dat[, Cm.cv := (Cm.mu - true.param.Cm.true)/true.param.Cm.true]
+# }}}
+
+# Isolate and melt relative SD and error {{{
+params <- c("N", "Cab", "Car", "Cw", "Cm")
+tnames <- sprintf("true.param.%s.true", params)
+rnames <- sprintf("%s.rsd", params)
+cnames <- sprintf("%s.cv", params)
+idvars <- c("sensor", "par.vary", "par.lnum", "q.level")
+fft.rsd <- fft.dat[, c(tnames, rnames, idvars), with=FALSE]
+fft.rm <- data.table(melt(fft.rsd, id.vars=c(tnames, idvars)))
+fft.rm <- fft.rm[mapply(grepl, par.vary, variable)]
+fft.err <- fft.dat[, c(tnames, cnames, idvars), with=FALSE]
+fft.em <- data.table(melt(fft.err, id.vars=c(tnames, idvars)))
+fft.em <- fft.em[mapply(grepl, par.vary, variable)]
+# }}}
+
+# Plot {{{
+p.theme <- theme_bw() + theme(axis.text.x = element_text(angle=90))
+p.unc <- ggplot(fft.rm) + aes(x=sensor, y=value, fill=variable) + 
+    facet_grid(q.level ~ par.lnum) + geom_bar(stat="identity", position="dodge") +
+    p.theme + ylab("Parameter relative SD")
+png("manuscript/figures/uncertainty.all.png", height=7, width=10, res=300)
+plot(p.unc)
+dev.off()
+
+png("manuscript/figures/error.all.png", height=7, width=10, res=300)
+p.err <- p.unc %+% fft.em + ylab("Parameter relative error")
+plot(p.err)
+#}}}
