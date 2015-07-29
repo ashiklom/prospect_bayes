@@ -17,7 +17,7 @@ error.matrix <- function(dat.mod, dat.obs, refltrans=2, relative=FALSE){
     #d.names <- d.names[d.names %in% names(dat.mod)]
     setkey(dat.mod, Sample_Name, Sample_Year)
     setkey(dat.obs, Sample_Name, Sample_Year)
-    rt.big <- dat.mod[dat.obs]
+    rt.big <- dat.mod[dat.obs, allow.cartesian=TRUE]
     tdiff <- function(mrow){
         pars <- mrow[1:5]
         obs <- mrow[-5:0]
@@ -61,7 +61,7 @@ error.plot <- function(err.mat){
 
 # Load data {{{ 
 #' Load transmittance data
-dropbox.path <- "/mnt/dropbox"
+dropbox.path <- "~/Dropbox"
 trans.path <- file.path(dropbox.path,
                         "NASA_TE_PEcAn-RTM_Project",
                         "Data", "Spectra",
@@ -113,8 +113,8 @@ th.all <- theme_bw() +
           axis.title = element_text(size=rel(0.8)),
           plot.margin = unit(c(0.15, 0.15, 0.15, 0.15), "lines"))
 th.mr <- theme(axis.title.y = element_blank()) 
-re.ylims <- ylim(-0.05, 0.12)
-te.ylims <- ylim(-0.28, 0.16)
+re.ylims <- ylim(-0.09, 0.1)
+te.ylims <- ylim(-0.2, 0.25)
 re.all <- re.all.raw + ggtitle("All") + ylab("Reflectance error (Model - Obs.)") + th.all + re.ylims
 re.h <- re.h.raw + ggtitle("Hardwood") + th.all + th.mr + re.ylims
 re.c <- re.c.raw + ggtitle("Conifer") + th.all + th.mr + re.ylims

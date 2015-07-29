@@ -1,0 +1,3 @@
+[submodule "sensor-manuscript/manuscript"]
+	path = sensor-manuscript/manuscript
+	url = git@gitlab.com:ashiklom/sensor-manuscript
