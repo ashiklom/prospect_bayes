@@ -1,3 +1,6 @@
 [submodule "sensor-manuscript/manuscript"]
 	path = sensor-manuscript/manuscript
 	url = git@gitlab.com:ashiklom/sensor-manuscript
+[submodule "trait-manuscript/manuscript"]
+	path = trait-manuscript/manuscript
+	url = https://git.overleaf.com/2820905hgypyg
