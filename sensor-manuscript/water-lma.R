@@ -1,6 +1,17 @@
 #' Validation plot based on Water and LMA
 source("../figure.common.R")
 
+# Preprocess data {{{
+# Keep only rows with inversion data
+fft.full <- fft.f
+fft.f <- fft.f[!is.na(N.mu)][sensor=="identity"]
+fft.h <- fft.f[plant.type == "hardwood"]
+fft.c <- fft.f[plant.type == "conifer"]
+
+# Factor the sensor list
+#fft.full[, sensor := factor(sensor, levels=sensor.list)]
+# }}}
+
 # Global theme {{{
 th.global <- theme_bw() + 
     theme(text = element_text(size=10),
@@ -39,7 +50,7 @@ water.c <- water.base %+% fft.c + aes(color=succession) +
         guides(color = guide_legend(title="Succession",
                                     title.position="top")) +
         theme(axis.title.y = element_blank())
-png.plot("figures/water.png", h=4, w=6)
+png.plot("manuscript/figures/water.png", h=4, w=6)
 grid.arrange(arrangeGrob(water.all),
              arrangeGrob(water.h, water.c, nrow=1, widths=c(1,1.4)),
              nrow=2)
@@ -73,7 +84,7 @@ lma.c <- lma.base %+% fft.c + aes(color=succession) +
                                     title.position="top")) +
         annotate("text", x=0.002, y=0.08, label="(c)", size=4)
         theme(axis.title.y = element_blank())
-png.plot("figures/lma.png", h=4, w=6) 
+png.plot("manuscript/figures/lma.png", h=4, w=6) 
 grid.arrange(arrangeGrob(lma.all),
              arrangeGrob(lma.h, lma.c, nrow=1, widths=c(1,1.4)),
              ncol=1)
@@ -91,19 +102,21 @@ rmse <- function(mod, obs){
   out <- list(RMSE=rmse, BIAS=bias, SEPC=sepc, CV=cv, RMSPE=rmspe)
   return(out)
 }
-rmse.water <- fft.spec[, rmse(Cw.mu, EWT_g_cm2), by=c("plant.type", "sensor")][,param := "EWT"]
-rmse.lma <- fft.spec[, rmse(Cm.mu, LMA_g_DW_cm2), by=c("plant.type", "sensor")][,param := "LMA"]
+rmse.water <- fft.spec[, rmse(Cw.mu, EWT_g_cm2), by=plant.type][,param := "EWT"]
+rmse.lma <- fft.spec[, rmse(Cm.mu, LMA_g_DW_cm2), by=plant.type][,param := "LMA"]
 rmse.table <- rbind(rmse.water, rmse.lma)
-rmse.melt <- melt(rmse.table, id.vars=c("plant.type", "sensor", "param"), variable.name="stat")
+
+setcolorder(rmse.table, c("param", "plant.type", "RMSE", "BIAS", "SEPC", "CV", "RMSPE"))
+setnames(rmse.table, c("param", "plant.type"), c("Parameter", "Plant type"))
 # }}}
 
 # Sensor response plots {{{
-rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value, fill=plant.type) +
-    facet_wrap(stat~param, scales="free") + geom_bar(stat="identity", position="dodge") +
-    theme(text = element_text(size=6), axis.text.x = element_text(angle=90, hjust=1))
-png.plot("fft-error-by-sensor.png", 5, 5)
-plot(rmse.plot)
-dev.off()
+#rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value, fill=plant.type) +
+    #facet_wrap(stat~param, scales="free") + geom_bar(stat="identity", position="dodge") +
+    #theme(text = element_text(size=6), axis.text.x = element_text(angle=90, hjust=1))
+#png.plot("fft-error-by-sensor.png", 5, 5)
+#plot(rmse.plot)
+#dev.off()
 # }}}
 
 # Prepare xtable {{{
@@ -113,9 +126,9 @@ Error statistics for equivalent water thickness (EWT) and leaf mass per unit are
 model estimates compared to inversion.
 "
 cap <- gsub("\\n", " ", cap)
-out.tab <- xtable(rmse.table, caption=cap, digits=-3, label="tab:water-lma-error")
+out.tab <- xtable(rmse.table, caption=cap, digits=4, label="tab:water-lma")
 out.tab.pre <- print(out.tab, file="", include.rownames=FALSE)
 out.tab.post <- out.tab.pre
-cat(out.tab.post, file="manuscript/tables/water-lma-error.tex")
+cat(out.tab.post, file="manuscript/tables/water-lma.tex")
 # }}}
 
