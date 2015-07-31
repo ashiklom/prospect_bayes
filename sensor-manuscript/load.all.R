@@ -2,7 +2,7 @@
 
 parnames <- c("N", "Cab", "Car", "Cw", "Cm", "residual")
 
-results.path <- "results"
+results.path <- "results-simulation"
 flist.full <- list.files(results.path, ".*.RData")
 results.list <- list()
 for(f in flist.full){
@@ -47,4 +47,4 @@ for(f in flist.full){
 #' Combine into data.table
 library(data.table)
 fft.dat <- do.call(rbindlist, list(results.list)) 
-save(fft.dat, file="../data/fft.dat.sensor.RData")
+save(fft.dat, file="../data/simulation.dat.RData")

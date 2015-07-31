@@ -47,5 +47,5 @@ for(f in flist.full){
 
 #' Combine into data.table
 library(data.table)
-fft.dat <- do.call(rbindlist, list(results.list)) 
-save(fft.dat, file="../data/simulation.dat.RData")
+simulation.dat <- do.call(rbindlist, list(results.list)) 
+save(simulation.dat, file="../data/simulation.samp.dat.RData")
