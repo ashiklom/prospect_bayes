@@ -6,11 +6,13 @@ library(ggplot2)
 library(reshape2)
 library(grid)
 library(gridExtra)
-load("../data/simulation.dat.RData")
+load("../data/simulation.samp.dat.RData")
 # }}}
 
 # Parse and format data {{{
 run.regex <- "(.*)[.](q[1-7])[.](.*)"
+fft.dat <- simulation.dat
+rm(simulation.dat)
 fft.dat[, par.level := gsub(run.regex, "\\1", fname)]
 fft.dat[, q.level := gsub(run.regex, "\\2", fname)]
 par.regex <- "(N|Cab|Car|Cw|Cm)([1-7])"
@@ -35,6 +37,7 @@ fft.dat[, Cab.cv := (Cab.mu - true.param.Cab.true)/true.param.Cab.true]
 fft.dat[, Car.cv := (Car.mu - true.param.Car.true)/true.param.Car.true]
 fft.dat[, Cw.cv := (Cw.mu - true.param.Cw.true)/true.param.Cw.true]
 fft.dat[, Cm.cv := (Cm.mu - true.param.Cm.true)/true.param.Cm.true]
+fft.dat[is.infinite(Cm.cv), Cm.cv := NA]
 # }}}
 
 # Isolate and melt relative SD and error {{{
@@ -43,12 +46,21 @@ tnames <- sprintf("true.param.%s.true", params)
 rnames <- sprintf("%s.rsd", params)
 cnames <- sprintf("%s.cv", params)
 idvars <- c("sensor", "par.vary", "par.lnum", "q.level")
-fft.rsd <- fft.dat[, c(tnames, rnames, idvars), with=FALSE]
-fft.rm <- data.table(melt(fft.rsd, id.vars=c(tnames, idvars)))
-fft.rm <- fft.rm[mapply(grepl, par.vary, variable)]
-fft.err <- fft.dat[, c(tnames, cnames, idvars), with=FALSE]
-fft.em <- data.table(melt(fft.err, id.vars=c(tnames, idvars)))
-fft.em <- fft.em[mapply(grepl, par.vary, variable)]
+sensor.table <- fft.dat[, lapply(.SD, mean, na.rm=TRUE), by=sensor, .SDcols=c(rnames, cnames)]
+library(xtable)
+cap <- "
+Mean parameter relative standard deviation (RSD = SD / Mean) and relative error (CV = Estimate - True/ True) by sensor.
+"
+cap <- gsub("\\n", " ", cap)
+out.tab <- xtable(sensor.table, caption=cap, digits=4, label="tab:sensor")
+print(out.tab, file="manuscript/tables/tab-sensor.tex")
+
+#fft.rsd <- fft.dat[, c(tnames, rnames, idvars), with=FALSE]
+#fft.rm <- data.table(melt(fft.rsd, id.vars=c(tnames, idvars)))
+#fft.rm <- fft.rm[mapply(grepl, par.vary, variable)]
+#fft.err <- fft.dat[, c(tnames, cnames, idvars), with=FALSE]
+#fft.em <- data.table(melt(fft.err, id.vars=c(tnames, idvars)))
+#fft.em <- fft.em[mapply(grepl, par.vary, variable)]
 # }}}
 
 # Plot all {{{
