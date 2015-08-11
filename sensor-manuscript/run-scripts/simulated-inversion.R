@@ -1,9 +1,13 @@
 #' Arguments: N, Cab, Car, Cw, Cm, sensor, ngibbs, run.name
 if(exists("TEST")) {
-    arg <- c(1.4, 30, 8.5, 0.01, 0.008, 
-             "aviris.classic", 500, "testrun")
+    arg <- c(2.4, 60, 15, 0.06, 0.003, 
+             "chris.proba", 10000, "testrun")
+    do.mle <- FALSE
+    quiet <- FALSE
 } else {
     arg <- commandArgs(trailingOnly=TRUE)
+    do.mle <- TRUE
+    quiet <- TRUE
 }
 
 #' Extract arguments
@@ -33,8 +37,8 @@ samples <- invert.slow(observed = obs,
                        prior = prior,
                        pm = pm,
                        model = model,
-                       do.mle = TRUE,
-                       quiet = TRUE)
+                       do.mle = do.mle,
+                       quiet = quiet)
 
 assign(run.name, list(true.params = true.params, 
                       inits = start.params,
@@ -43,12 +47,15 @@ assign(run.name, list(true.params = true.params,
 
 if(exists("TEST")){
     par(mfrow = c(5,2))
+    sb <- samples[-9000:0,1:5]
+    #sb <- samples[-(floor(ngibbs*0.5)):0,1:5]
     for(i in 1:5){
-        plot(samples[,i], type='l')
+        plot(sb[,i], type='l')
         abline(h = true.params[i], col="red")
-        plot(density(samples[-(floor(ngibbs*0.5)):0, i]))
+        plot(density(sb[,i]))
         abline(v = true.params[i], col="red")
     }
+    pplt <- function() pairs(sb, pch=".")
 } else {
     save(list=run.name, file=sprintf("../results-simulation/%s.RData", run.name))
 }

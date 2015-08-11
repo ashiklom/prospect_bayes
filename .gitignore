@@ -3,3 +3,7 @@
 .dat
 .qlog
 Rprof.out
+other-scripts/*.csv
+other-scripts/*.RData
+data/some-simulations/*
+sensor-manuscript/results-simulation/*
