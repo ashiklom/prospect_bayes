@@ -1,4 +1,36 @@
-# Spectra simulated using PROSPECT
+# ED2 spectral inputs simulated using PROSPECT
+library(PEcAnRTM)
+
+# Functions to convert from lognormal moments to parameters
+lognorm.mu <- function(m,v) log(m / sqrt(1 + v / m^2))
+lognorm.sigma <- function(m,v) sqrt(log(1 + v / m^2))
+
+# Hardwood summary statistics (N, Cab, Car, Cw, Cm)
+# Based on Feret et al 2011, RSE 115:2742-2750
+# NOTE: Variance is artificially inflated by a factor of 3
+means.h <- c(1.7, 32.81, 8.51, 0.0129, 0.0077)
+var.h <- c(0.6, 18.87, 3.92, 0.0073, 0.0035)^2 * 3
+mu.h <- lognorm.mu(means.h, var.h)
+sigma.h <- lognorm.sigma(means.h, var.h)
+
+# Simulate hardwood spectra
+nsamp <- 5000   # Number of spectra
+npar <- length(means.h)
+params.h <- matrix(rlnorm(nsamp*npar, mu.h, sigma.h), nsamp, npar, byrow=TRUE)
+spec.h <- apply(params.h, 1, prospect, version=5)
+
+# Conifer summary statistics
+# Car and Cab from Di Vittorio 2009 RSE 113:1948-1966
+# Others from Croft et al 2014 Ecological Complexity 17: 119-130 (variances are made up!!)
+means.c <- c(2.6, 66, 12.2, 0.001, 0.035)
+var.c <- c(1, 13, 2.6, 0.01, 0.1)
+mu.c <- lognorm.mu(means.c, var.c)
+sigma.c <- lognorm.sigma(means.c, var.c)
+
+# Simulate hardwood spectra
+params.c <- matrix(rlnorm(nsamp*npar, mu.h, sigma.h), nsamp, npar, byrow=TRUE)
+spec.c <- apply(params.c, 1, prospect, version=5)
+
 
 # Load FFT data
 source("preprocess.fft.R")
