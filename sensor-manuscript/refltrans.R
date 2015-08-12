@@ -114,7 +114,7 @@ re.c <- re.c.raw + ggtitle("Conifer") + th.all + th.mr + re.ylims
 te.all <- te.all.raw + ylab("Transmittance error (Model - Obs.)") + th.all + te.ylims
 te.h <- te.h.raw + th.all + th.mr + te.ylims
 te.c <- te.c.raw + th.all + th.mr + te.ylims
-png("manuscript/figures/refltrans-validation.png", width=6, height=6, units="in", res=300)
+pdf("manuscript/figures/refltrans-validation.pdf", width=6, height=6)
 grid.arrange(re.all, re.h, re.c, te.all, te.h, te.c, nrow=2)
 dev.off()
 # }}} 

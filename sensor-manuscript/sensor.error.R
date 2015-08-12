@@ -23,7 +23,6 @@ Car.plot <- gen.plot + aes(x=true.param.Car.true, y=Car.mu) + ylab("Car") + no.x
 Cw.plot <- gen.plot + aes(x=true.param.Cw.true, y=Cw.mu) + ylab("Cw") + no.x
 Cm.plot <- gen.plot + aes(x=true.param.Cm.true, y=Cm.mu) + ylab("Cm") + no.x
 
-png("manuscript/figures/sensor-error.png", height=7, width=7,
-    units="in", res=300)
+pdf("manuscript/figures/sensor-error.pdf", height=7, width=7)
 grid.arrange(N.plot, Cab.plot, Car.plot, Cw.plot, Cm.plot, ncol=1)
 dev.off()

@@ -50,7 +50,7 @@ water.c <- water.base %+% fft.c + aes(color=succession) +
         guides(color = guide_legend(title="Succession",
                                     title.position="top")) +
         theme(axis.title.y = element_blank())
-png.plot("manuscript/figures/water.png", h=4, w=6)
+pdf("manuscript/figures/water.pdf", height=4, width=6)
 grid.arrange(arrangeGrob(water.all),
              arrangeGrob(water.h, water.c, nrow=1, widths=c(1,1.4)),
              nrow=2)
@@ -84,7 +84,7 @@ lma.c <- lma.base %+% fft.c + aes(color=succession) +
                                     title.position="top")) +
         annotate("text", x=0.002, y=0.08, label="(c)", size=4)
         theme(axis.title.y = element_blank())
-png.plot("manuscript/figures/lma.png", h=4, w=6) 
+pdf("manuscript/figures/lma.pdf", height=4, width=6) 
 grid.arrange(arrangeGrob(lma.all),
              arrangeGrob(lma.h, lma.c, nrow=1, widths=c(1,1.4)),
              ncol=1)
