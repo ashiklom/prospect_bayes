@@ -169,8 +169,10 @@ cap <- gsub("\\n", " ", cap)
 out.tab <- xtable(tsumtab, caption=cap, label="tab:refltrans", digits=4)
 # Post processing
 out.tab.pre <- print(out.tab, file="", include.rownames=TRUE)
-out.tab.post <- out.tab.pre 
-cat(out.tab.post, file="manuscript/tables/error-stats.tex")
+out.tab.post <- out.tab.pre
+out.tab.post <- gsub("centering", "centerline{", out.tab.post)
+out.tab.post <- gsub("(end\\{tabular\\})", "\\1\n\\}", out.tab.post)
+cat(out.tab.post, file="manuscript/tables/refltrans.tex")
 # }}}
 
 # vim: set foldlevel=0 :

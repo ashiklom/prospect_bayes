@@ -4,12 +4,11 @@ library(data.table)
 
 # Read command line arguments
 arg <- commandArgs(trailingOnly=TRUE)
-PATH.data <- arg[1]
-if(is.na(PATH.data)) PATH.data <- "/mnt/dropbox/NASA_TE_PEcAN-RTM_Project/Data"
-PATH.spectra <- arg[2] 
-if(is.na(PATH.spectra)) PATH.spectra <-"/mnt/dropbox/FFT_spectra/FFT_spectra_unique.csv"
-PATH.speciesinfo <- arg[3]
-if(is.na(PATH.speciesinfo)) PATH.speciesinfo <- "/mnt/dropbox/NASA_TE_PEcAn-RTM_Project/Data/FFT_species_info_csv.csv"
+PATH.dropbox <- arg[1]
+if(is.na(PATH.dropbox)) PATH.dropbox <- "~/Dropbox"
+PATH.data <- file.path(PATH.dropbox, "NASA_TE_PEcAN-RTM_Project/Data")
+PATH.spectra <-file.path(PATH.dropbox, "/FFT_spectra/FFT_spectra_unique.csv")
+PATH.speciesinfo <- file.path(PATH.dropbox, "NASA_TE_PEcAn-RTM_Project/Data/FFT_species_info_csv.csv")
 
 ### Setup paths
 PATH.data.FFT = file.path(PATH.data, "NASA_FFT_Project")
@@ -17,7 +16,7 @@ PATH.data.FFT.d15N = file.path(PATH.data.FFT, "NASA_FFT_d15N_ANALYZED_DATA_UPDAT
 PATH.data.FFT.lignin = file.path(PATH.data.FFT, "NASA_FFT_FIB_LIG_CELL_RESULTS_FINAL_4R.csv")
 PATH.data.FFT.CN = file.path(PATH.data.FFT, "NASA_FFT_Project_CN_Data_4R.csv")
 PATH.data.FFT.SLA_LMA = file.path(PATH.data.FFT, "NASA_FFT_SLA_LMA_Data_v2_4R_updated_new.csv")
-PATH.results <- "data/fft.dat.sensor.RData"
+PATH.results <- "data/fft.dat.RData"
 
 ### Read data
 FFT.d15N <- read.csv(PATH.data.FFT.d15N, header=TRUE, stringsAsFactors = FALSE)

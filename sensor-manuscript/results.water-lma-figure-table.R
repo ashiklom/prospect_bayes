@@ -1,6 +1,6 @@
 #' Validation plot based on Water and LMA
 source("../figure.common.R")
-fft.spec <- fft.full[!is.na(N.mu)]
+fft.spec <- fft.f[!is.na(N.mu)]
 
 # Preprocess data {{{
 # Keep only rows with inversion data

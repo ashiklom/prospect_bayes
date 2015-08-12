@@ -31,15 +31,15 @@ for(s in sensor.list){
     datlist[[f.name]] <- samples.dat
 }
 
-
 # Create pairs plot
+sampdat <- rbindlist(datlist)
 params <- c("N", "Cab", "Car", "Cw", "Cm")
 names(true.param) <- params
 param.pairs <- combn(params, 2, simplify=FALSE)
 plot.sensor <- c("identity", "aviris.ng", "modis", "landsat8")
 sensor.color <- c("orange", "blue", "dark green", "dark red")
 names(sensor.color) <- plot.sensor
-plot.data <- sampdat[sensor %in% s][, sensor := factor(sensor, levels=rev(plot.sensor))]
+plot.data <- sampdat[sensor %in% plot.sensor][, sensor := factor(sensor, levels=rev(plot.sensor))]
 plot.all <- ggplot(plot.data) + aes(color=sensor, order=sensor) +
     geom_density2d(size=0.2) +
     stat_density2d(aes(fill=sensor), alpha=0.2,  geom="polygon") +

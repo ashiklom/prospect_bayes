@@ -72,5 +72,5 @@ out.tab.pre <- print(out.tab, file="", include.rownames=FALSE,
 out.tab.post <- out.tab.pre
 out.tab.post <- gsub("centering", "centerline{", out.tab.post)
 out.tab.post <- gsub("(end\\{tabular\\})", "\\1\n\\}", out.tab.post)
-cat(out.tab, file="manuscript/tables/tab-sensor.tex")
+cat(out.tab.post, file="manuscript/tables/tab-sensor.tex")
 # }}}
