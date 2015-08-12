@@ -6,7 +6,7 @@ if(exists("TEST")) {
     quiet <- FALSE
 } else {
     arg <- commandArgs(trailingOnly=TRUE)
-    do.mle <- TRUE
+    do.mle <- FALSE
     quiet <- TRUE
 }
 
