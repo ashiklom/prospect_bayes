@@ -1,11 +1,12 @@
-# Sensor covariance plots
+# Sensor covariance plot
 library(ggplot2)
 library(PEcAnRTM)
 library(gridExtra)
 library(grid)
 library(reshape2)
 
-datnum <- 100
+# Data identifier -- Each ID corresponds to a single set of true values
+datnum <- 100    
 parnames <- c("N", "Cab", "Car", "Cw", "Cm")
 datlist <- list()
 for(s in sensor.list){
@@ -28,21 +29,7 @@ for(s in sensor.list){
     colnames(samples.pairs) <- parnames[1:5]
     samples.dat <- data.table(samples.pairs)[,sensor := s]
     datlist[[f.name]] <- samples.dat
-# Pairs plot
-    #plotname <- sprintf("manuscript/figures/pairs-%s.png", s)
-    #png(plotname, height=6, width=6, units="in", res=300)
-    #pairs(samples.pairs, pch=".", main=s)
-    #dev.off()
 }
-
-sampdat <- rbindlist(datlist)
-#sampdat[, sensor := factor(sensor, levels=sensor.list.flip)]
-r.hi <- c("identity", "aviris.ng", "aviris.classic", "hyperion", "chris.proba")
-r.med <- c("landsat5", "landsat7", "landsat8", "modis", "viirs")
-r.low <- c("avhrr")
-sampdat[sensor %in% r.hi, res := "hi"]
-sampdat[sensor %in% r.med, res := "med"]
-sampdat[sensor %in% r.low, res := "low"]
 
 
 # Create pairs plot
@@ -77,7 +64,7 @@ for(p in param.pairs){
                                         axis.ticks.x = element_blank())
     plotlist[[pc]] <- plt
 }
-blank <- grid.rect(gp = gpar(col="white"))
+blank <- grid.rect(gp = gpar(col="white"), draw=FALSE)
 pdf(file="manuscript/figures/pairs-4.pdf", width=7, height=5)
 grid.arrange(textGrob("N"), blank, blank, blank, blank,
              plotlist[["N-Cab"]], textGrob("Cab"), blank, blank, blank,

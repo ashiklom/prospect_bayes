@@ -1,5 +1,6 @@
 #' Validation plot based on Water and LMA
 source("../figure.common.R")
+fft.spec <- fft.full[!is.na(N.mu)]
 
 # Preprocess data {{{
 # Keep only rows with inversion data
@@ -110,15 +111,6 @@ setcolorder(rmse.table, c("param", "plant.type", "RMSE", "BIAS", "SEPC", "CV", "
 setnames(rmse.table, c("param", "plant.type"), c("Parameter", "Plant type"))
 # }}}
 
-# Sensor response plots {{{
-#rmse.plot <- ggplot(rmse.melt) + aes(x=sensor, y=value, fill=plant.type) +
-    #facet_wrap(stat~param, scales="free") + geom_bar(stat="identity", position="dodge") +
-    #theme(text = element_text(size=6), axis.text.x = element_text(angle=90, hjust=1))
-#png.plot("fft-error-by-sensor.png", 5, 5)
-#plot(rmse.plot)
-#dev.off()
-# }}}
-
 # Prepare xtable {{{
 library(xtable)
 cap <- "
@@ -129,6 +121,8 @@ cap <- gsub("\\n", " ", cap)
 out.tab <- xtable(rmse.table, caption=cap, digits=4, label="tab:water-lma")
 out.tab.pre <- print(out.tab, file="", include.rownames=FALSE)
 out.tab.post <- out.tab.pre
+out.tab.post <- gsub("centering", "centerline{", out.tab.post)
+out.tab.post <- gsub("(end\\{tabular\\})", "\\1\n\\}", out.tab.post)
 cat(out.tab.post, file="manuscript/tables/water-lma.tex")
 # }}}
 

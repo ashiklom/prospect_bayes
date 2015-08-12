@@ -67,7 +67,10 @@ Mean accuracy ($\\alpha$) and precision ($\\pi$) by sensor.
 "
 cap <- gsub("\\n", " ", cap)
 out.tab <- xtable(sensor.table, caption=cap, digits=4, label="tab:sensor")
-print(out.tab, file="manuscript/tables/tab-sensor.tex", 
-      sanitize.text.function=function(x) x,
-      include.rownames = FALSE)
+out.tab.pre <- print(out.tab, file="", include.rownames=FALSE,
+                     sanitize.text.function = function(x) x)
+out.tab.post <- out.tab.pre
+out.tab.post <- gsub("centering", "centerline{", out.tab.post)
+out.tab.post <- gsub("(end\\{tabular\\})", "\\1\n\\}", out.tab.post)
+cat(out.tab, file="manuscript/tables/tab-sensor.tex")
 # }}}
