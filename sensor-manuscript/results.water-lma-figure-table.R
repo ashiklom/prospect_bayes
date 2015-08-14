@@ -1,6 +1,5 @@
 #' Validation plot based on Water and LMA
 source("../figure.common.R")
-fft.spec <- fft.f[!is.na(N.mu)]
 
 # Preprocess data {{{
 # Keep only rows with inversion data
@@ -103,8 +102,8 @@ rmse <- function(mod, obs){
   out <- list(RMSE=rmse, BIAS=bias, SEPC=sepc, CV=cv, RMSPE=rmspe)
   return(out)
 }
-rmse.water <- fft.spec[, rmse(Cw.mu, EWT_g_cm2), by=plant.type][,param := "EWT"]
-rmse.lma <- fft.spec[, rmse(Cm.mu, LMA_g_DW_cm2), by=plant.type][,param := "LMA"]
+rmse.water <- fft.f[, rmse(Cw.mu, EWT_g_cm2), by=plant.type][,param := "EWT"]
+rmse.lma <- fft.f[, rmse(Cm.mu, LMA_g_DW_cm2), by=plant.type][,param := "LMA"]
 rmse.table <- rbind(rmse.water, rmse.lma)
 
 setcolorder(rmse.table, c("param", "plant.type", "RMSE", "BIAS", "SEPC", "CV", "RMSPE"))

@@ -63,7 +63,7 @@ setnames(sensor.table, rnames, sprintf("$\\pi(\\mathrm{%s})$", params))
 # Write xtable {{{
 library(xtable)
 cap <- "
-Mean accuracy ($\\alpha$) and precision ($\\pi$) by sensor.
+Mean inaccuracy ($\\alpha$) and uncertainty ($\\pi$) by sensor.
 "
 cap <- gsub("\\n", " ", cap)
 out.tab <- xtable(sensor.table, caption=cap, digits=4, label="tab:sensor")
