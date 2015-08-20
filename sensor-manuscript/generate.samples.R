@@ -8,7 +8,6 @@ vars <- c("N.mu", "Cab.mu", "Car.mu", "Cw.mu", "Cm.mu")
 fft.sub <- fft.f[!is.na(N.mu)][sensor=="identity"][,vars,with=F]
 full.mat <- as.matrix(fft.sub)
 full.mat <- full.mat[sample(1:nrow(full.mat)), ]
-#full.mat <- fftmat[sample(1:nrow(fftmat), 300, replace=FALSE),]
 
 # Write submission script
 n.sensor <- length(sensor.list)
