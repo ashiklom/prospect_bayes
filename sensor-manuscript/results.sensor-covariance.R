@@ -1,76 +1,103 @@
 # Sensor covariance plot
-library(ggplot2)
 library(PEcAnRTM)
-library(gridExtra)
-library(grid)
-library(reshape2)
+library(MASS)
 
+datnum <- 77
+sensor.sub <- c("identity", "aviris.ng", "landsat8", "modis")
+# {{{ Load data
 # Data identifier -- Each ID corresponds to a single set of true values
-datnum <- 100    
-parnames <- c("N", "Cab", "Car", "Cw", "Cm")
 datlist <- list()
-for(s in sensor.list){
-    f.path <- sprintf("../data/some-simulations/%s.%d.RData", s, datnum)
-    load(f.path)
-    f.name <- gsub(".*/(.*)[.]RData", "\\1", f.path)
-    f.list <- get(f.name)
-    rm(list=f.name)
+path <- "some-simulations"
+for(s in sensor.sub){
+    f.name <- sprintf("%s.%d.RData", s, datnum)
+    f.list <- load.from.name(f.name, path)
     sensor <- list(sensor = f.list$sensor)
     samples <- f.list$samples
-    true.param <- as.list(f.list$true.param)
-    names(true.param) <- sprintf("%s.true", parnames[1:5])
-# Burn in and thin
-    ngibbs <- nrow(samples)
-    burnin <- floor(ngibbs/2)
-    thin <- (ngibbs - burnin) / 5000
-    bt <- seq(burnin, ngibbs, by=thin)
-    samples.sub <- samples[bt,]
+    samples.sub <- burnin.thin(samples)
     samples.pairs <- samples.sub[,1:5]
-    colnames(samples.pairs) <- parnames[1:5]
-    samples.dat <- data.table(samples.pairs)[,sensor := s]
-    datlist[[f.name]] <- samples.dat
+    colnames(samples.pairs) <- params.prospect5
+    datlist[[s]] <- samples.pairs
+}
+true.param <- unlist(f.list[params.prospect5])
+samples.all <- do.call(rbind, datlist)
+# }}}
+
+quant.val <- 97
+# Identity, AVIRIS NG, MODIS, Landsat
+pal.sensor <- c("Greens", "Reds", "Blues", "Oranges")
+col.sensor <- c("orange", "dark blue", "dark red", "dark green")
+
+# {{{ Density plot functions
+quant <- c((100-quant.val)/200, (quant.val+(100-quant.val)/2)/100)
+# Generic density plot
+densplot <- function(x, y, pal, color, lwd=1){
+    z <- kde2d(x, y, n=50)
+    nlev <- 7
+    my.cols <- brewer.pal(nlev, pal)
+    zlim <- range(z$z, finite=TRUE)
+    levs <- seq(zlim[1], zlim[2], length.out=nlev)
+    #.filled.contour(z$x, z$y, z$z, levs, my.cols)
+    contour(z, drawlabels=FALSE, levels=levs, add=TRUE, col=color, lwd=lwd)
 }
 
-# Create pairs plot
-sampdat <- rbindlist(datlist)
-params <- c("N", "Cab", "Car", "Cw", "Cm")
-names(true.param) <- params
-param.pairs <- combn(params, 2, simplify=FALSE)
-plot.sensor <- c("identity", "aviris.ng", "modis", "landsat8")
-sensor.color <- c("orange", "blue", "dark green", "dark red")
-names(sensor.color) <- plot.sensor
-plot.data <- sampdat[sensor %in% plot.sensor][, sensor := factor(sensor, levels=rev(plot.sensor))]
-plot.all <- ggplot(plot.data) + aes(color=sensor, order=sensor) +
-    geom_density2d(size=0.2) +
-    stat_density2d(aes(fill=sensor), alpha=0.2,  geom="polygon") +
-    scale_color_manual(values = sensor.color) + 
-    scale_fill_manual(values = sensor.color) +
-    guides(color = FALSE, fill = FALSE) +
-    theme_bw() + 
-    theme(axis.text = element_text(size=5),
-          axis.title = element_blank(),
-          plot.margin = unit(c(0,0,0.05,0.05), "lines"))
-plotlist <- list()
-for(p in param.pairs){
-    pc <- sprintf("%s-%s", p[1], p[2])
-    py <- true.param[[p[2]]]
-    px <- true.param[[p[1]]]
-    plt <- plot.all + aes_string(x=p[1], y=p[2]) +
-        geom_hline(y=py, linetype="dashed", color="black", size=0.6) +
-        geom_vline(x=px, linetype="dashed", color="black", size=0.6)
-    if(p[1] != "N") plt <- plt + theme(axis.text.y = element_blank(),
-                                       axis.ticks.y = element_blank())
-    if(p[2] != "Cm") plt <- plt + theme(axis.text.x = element_blank(),
-                                        axis.ticks.x = element_blank())
-    plotlist[[pc]] <- plt
+# Density plot for just identity
+identity.plot <- function(nx, ny){
+    dat <- samples.all[1:5001,]
+    xrange <- quantile(dat[,nx], quant)
+    #xrange[1] <- min(xrange[1], true.param[nx])
+    #xrange[2] <- max(xrange[2], true.param[nx])
+    yrange <- quantile(dat[,ny], quant)
+    #yrange[1] <- min(yrange[1], true.param[nx])
+    #yrange[2] <- max(yrange[2], true.param[nx])
+    x <- dat[, nx]
+    y <- dat[, ny]
+    plot(xrange, yrange, type='n', xaxt='n', yaxt='n')
+    if(ny == 1) axis(3, at=pretty(xrange), labels=pretty(xrange))
+    if(nx == 5) axis(4, at=pretty(yrange), labels=pretty(yrange))
+    densplot(x, y, "Oranges", "black")
+    abline(v=true.param[nx], lwd=1.5, lty=2)
+    abline(h=true.param[ny], lwd=1.5, lty=2)
 }
-blank <- grid.rect(gp = gpar(col="white"), draw=FALSE)
-pdf(file="manuscript/figures/pairs-4.pdf", width=7, height=5)
-grid.arrange(textGrob("N"), blank, blank, blank, blank,
-             plotlist[["N-Cab"]], textGrob("Cab"), blank, blank, blank,
-             plotlist[["N-Car"]], plotlist[["Cab-Car"]], textGrob("Car"), blank, blank,
-             plotlist[["N-Cw"]], plotlist[["Cab-Cw"]], plotlist[["Car-Cw"]], textGrob("Cw"), blank,
-             plotlist[["N-Cm"]], plotlist[["Cab-Cm"]], plotlist[["Car-Cm"]], plotlist[["Cw-Cm"]], textGrob("Cm"),
-             nrow=5)
+
+# Density plot for all sensors
+sensor.plot <- function(nx, ny){
+    xrange <- quantile(samples.all[,nx], quant)
+    yrange <- quantile(samples.all[,ny], quant)
+    plot(xrange, yrange, type='n', xaxt='n', yaxt='n')
+    if(ny == 5) axis(1, at=pretty(xrange), labels=pretty(xrange))
+    if(nx == 1) axis(2, at=pretty(yrange), labels=pretty(yrange))
+    for(i in 4:1){
+        imin <- (i-1)*5001 + 1
+        imax <- i * 5001
+        x <- samples.all[imin:imax,nx]
+        y <- samples.all[imin:imax,ny]
+        densplot(x, y, pal.sensor[i], col.sensor[i], lwd=i/2)
+    }
+    abline(v=true.param[nx], lwd=1.5, lty=2)
+    abline(h=true.param[ny], lwd=1.5, lty=2)
+}
+# }}}        
+
+# {{{ Draw density plots
+plt.list <- list("N", c(2, 1, 1), c(3, 1, 1), c(4, 1, 1), c(5, 1, 1),
+                 c(1, 2, 2), "Cab", c(3, 2, 1), c(4, 2, 1), c(5, 2, 1),
+                 c(1, 3, 2), c(2, 3, 2), "Car", c(4, 3, 1), c(5, 3, 1),
+                 c(1, 4, 2), c(2, 4, 2), c(3, 4, 2), "Cw", c(5, 4, 1),
+                 c(1, 5, 2), c(2, 5, 2), c(3, 5, 2), c(4, 5, 2), "Cm")
+pdf(file="manuscript/drive-folder/pairs-4.pdf", width=7, height=5)
+par(mfrow=c(5,5), mar=c(1,1,1,1), oma=c(2,2,2,2))
+for(p in plt.list){
+    if(is.character(p)){
+# Diagonal -- write parameter
+        plot(c(0,1), c(0,1), ann=F, type='n', xaxt='n', yaxt='n')
+        text(x=0.5, y=0.5, p, cex=2)
+    } else if(p[3] == 1) {
+# Upper panel -- plot full spectra densplot
+        identity.plot(p[1], p[2])
+    } else if(p[3] == 2) {
+        sensor.plot(p[1], p[2])
+    }
+}
 dev.off()
+# }}}
 
