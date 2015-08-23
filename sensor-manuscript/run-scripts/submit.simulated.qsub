@@ -1,5 +1,5 @@
-#!/bin/bash
-#$ -S /bin/bash -cwd -j y -o log.qlog -l h_rt=10:00:00 
+#!/bin/bash -l
+#$ -S /bin/bash -cwd -j y -o logs -l h_rt=10:00:00 
 #$ -q "geo*"
 
 echo "=========================================================="
@@ -13,7 +13,7 @@ echo "Run name : $runname"
 echo "=========================================================="
 
 module load R/3.2.0
-Rscript simulated-inversion.R $N $Cab $Car $Cw $Cm $sensor $ngibbs $runname
+Rscript simulated-inversion.R $index $sensor $ngibbs $runname
 
 echo "=========================================================="
 echo "Finished on : $(date)"
