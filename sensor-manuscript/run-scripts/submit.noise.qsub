@@ -1,0 +1,17 @@
+#!/bin/bash -l
+#$ -S /bin/bash -cwd -j y -o logs -l h_rt=10:00:00 
+#$ -q "geo*"
+
+echo "=========================================================="
+echo "Starting on : $(date)"
+echo "Running on node : $(hostname)"
+echo "Current directory : $(pwd)"
+echo "Parameters: $N $Cab $Car $Cw $Cm $fw $sigma $n"
+echo "=========================================================="
+
+module load R/3.2.0
+Rscript noiserun.R $N $Cab $Car $Cw $Cm $fw $sigma $n
+
+echo "=========================================================="
+echo "Finished on : $(date)"
+echo "=========================================================="
