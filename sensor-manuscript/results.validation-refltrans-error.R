@@ -30,6 +30,7 @@ library(xtable)
 #' `fft.preprocess.R`). We then subset `fft.f` to only the full spectra, where 
 #' inversion parameter estimates are not `NA`, and only for tree species (i.e.  
 #' excluding shrubs and grasses).
+
 load("../data/FFT.processed.RData")
 fft.f <- fft.f[sensor=="identity"][!is.na(N.mu)][plant.type %in% c("hardwood", "conifer")]
 rm(fft.h, fft.c)
@@ -37,7 +38,9 @@ rm(fft.h, fft.c)
 #' We then load the observed transmittance data. These data are stored in a 
 #' private Dropbox and are available on request. To accelerate and facilitate 
 #' loading and pre-processing, we only load a subset of the columns, indicated 
-#' by `keep.cols`. keep.wl <- sprintf("Wave_%d", 400:2500)
+#' by `keep.cols`.
+
+keep.wl <- sprintf("Wave_%d", 400:2500)
 keep.other <- c("Spectra", "Species", "Sample_Name", "Sample_Year")
 keep.cols <- c(keep.wl, keep.other)
 dropbox.path <- "~/Dropbox"
@@ -58,6 +61,7 @@ remove.negatives <- function(x){
 trans <- trans[, lapply(.SD, remove.negatives)]
 
 #' We then load the reflectance data, stored in the same place.
+
 refl.path <- file.path(dropbox.path,
                         "NASA_TE_PEcAn-RTM_Project",
                         "Data", "Spectra",
@@ -119,6 +123,7 @@ tem.c.raw <- error.matrix(fft.f[plant.type=="conifer"], trans, 2)
 #' draws the mean as a solid black line and the percentile regions as lightly 
 #' shaded regions bounded by dashed lines. We then apply this function to each 
 #' of the error matrices computed above.
+
 error.plot <- function(err.mat){
     require(ggplot2)
     err.mat <- t(err.mat)
@@ -174,6 +179,7 @@ dev.off()
 #' To facilitate comparison with other studies and due to their inherent 
 #' differences, we compute statistics separately for the visible (VIS) and near 
 #' infrared (NIR) regions of the spectrum, defined here.
+
 vis.wl <- 400:800
 nir.wl <- 801:2500
 
