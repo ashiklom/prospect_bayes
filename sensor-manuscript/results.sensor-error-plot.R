@@ -45,8 +45,15 @@ gen.theme <- theme_bw() +
 no.x <- theme(axis.title.x = element_blank())
 gen.plot <- ggplot(simulation.dat) + 
     facet_grid(.~sensor) + geom_point(size=1) +
+    #geom_linerange(size=0.5) +
     geom_abline(linetype="dashed", color="red") +
     gen.theme
+
+#N.plot <- gen.plot + aes(x=N, y=N.mu, ymin=N.mu-1.96*N.N.sigma, ymax=N.mu+1.96*N.N.sigma) + ylab("N") + no.x
+#Cab.plot <- gen.plot + aes(x=Cab, y=Cab.mu, ymin=Cab.mu-1.96*Cab.Cab.sigma, ymax=Cab.mu+1.96*Cab.Cab.sigma) + ylab("Cab") + no.x
+#Car.plot <- gen.plot + aes(x=Car, y=Car.mu, ymin=Car.mu-1.96*Car.Car.sigma, ymax=Car.mu+1.96*Car.Car.sigma) + ylab("Car") + no.x
+#Cw.plot <- gen.plot + aes(x=Cw, y=Cw.mu, ymin=Cw.mu-1.96*Cw.Cw.sigma, ymax=Cw.mu+1.96*Cw.Cw.sigma) + ylab("Cw") + no.x
+#Cm.plot <- gen.plot + aes(x=Cm, y=Cm.mu, ymin=Cm.mu-1.96*Cm.Cm.sigma, ymax=Cm.mu+1.96*Cm.Cm.sigma) + ylab("Cm") + no.x
 
 N.plot <- gen.plot + aes(x=N, y=N.mu) + ylab("N") + no.x
 Cab.plot <- gen.plot + aes(x=Cab, y=Cab.mu) + ylab("Cab") + no.x
