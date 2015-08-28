@@ -20,9 +20,12 @@ library(gridExtra)
 library(grid)
 load("../data/simulation.samp.dat.RData")
 
-#' To facilitate plot organization, we convert the representation of the sensor 
-#' from character to factor ordered based on PEcAnRTM's `sensor.list`.
-simulation.dat[, sensor := factor(sensor, levels=sensor.list)]
+#' To facilitate plot organization, we first change the sensor names to their 
+#' pretty versions (`sensor.proper`) and then convert the representation of the 
+#' sensor from character to factor with a pre-defined order based on spectral 
+#' resolution.
+simulation.dat[, sensor := sensor.proper[sensor]]
+simulation.dat[, sensor := factor(sensor, levels=sensor.proper)]
 
 #' # Plot specifications
 #' The following lines provide graphical preferences for the plot. The `no.x` 
@@ -38,7 +41,7 @@ simulation.dat[, sensor := factor(sensor, levels=sensor.list)]
 
 gen.theme <- theme_bw() + 
     theme(axis.text = element_text(size=5),
-          strip.text = element_text(size=8))
+          strip.text = element_text(size=5))
 no.x <- theme(axis.title.x = element_blank())
 gen.plot <- ggplot(simulation.dat) + 
     facet_grid(.~sensor) + geom_point(size=1) +
