@@ -42,11 +42,11 @@ sdcols <- c(sprintf("%s.%s", params.prospect5, rep(c("error", "z"), each=5)))
 sigma.dat <- noise.dat[, lapply(.SD, mean), by=c("sigma", "fw"), .SDcols=sdcols]
 
 # True values outside confidence limits
-out.func <- function(x) sum(as.numeric(abs(x) > qnorm(0.99)))
+out.func <- function(x) sum(as.numeric(abs(x) > qnorm(0.99)))/length(x)
 out.dat <- noise.dat[, lapply(.SD, out.func), by=c("sigma", "fw"), .SDcols=sdcols]
 
 # Plots
-p.out <- ggplot(out.dat) + aes(x=sigma, y=Cab.z) +
+p.out <- ggplot(out.dat[sigma <= 0.001]) + aes(x=sigma, y=Cab.z) +
     geom_line() + facet_wrap("fw")
 plot(p.out)
 
