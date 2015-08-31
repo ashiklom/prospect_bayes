@@ -116,6 +116,43 @@ tem.all.raw <- error.matrix(fft.f, trans, 2)
 tem.h.raw <- error.matrix(fft.f[plant.type=="hardwood"], trans, 2)
 tem.c.raw <- error.matrix(fft.f[plant.type=="conifer"], trans, 2)
 
+#' When validating the inversion results of the FFT database, it is important 
+#' to distinguish between errors inherent to PROSPECT (which this paper does 
+#' not address) from errors arising from PROSPECT inversion (which are more 
+#' relevant to this paper). Whereas the above code block prepares data for a 
+#' validation against measured spectra, the following code block loads 
+#' simulated data used to test the extent to which spectral inversion errors 
+#' come from our inversion algorithm rather than inherent issues with PROSPECT.
+
+#' The data for this block comes from the sensor simulation experiment, which 
+#' is based on inversion estimates from the FFT database (to preserve inherent 
+#' parameter covariances). Each of these is stored in a separate RData file, so 
+#' we have to load them separately. To generate the "observed" spectra for 
+#' each, we run the PROSPECT model using the true parameter values and then add 
+#' the stored noise spectrum. For transmittance, we use the `PEcAnRTM` 
+#' `generate.noise` function with the same parameters as reflectance to 
+#' generate random noise (for repeatability, we manually seed the random number 
+#' generator).  To generate the modeled spectra, we run PROSPECT using the mean 
+#' values of the inversion estimates.
+
+set.seed(777)
+fpath <- "identity-results"
+flist <- list.files(fpath)
+nfiles <- length(flist)
+rem <- matrix(NA, 2101, nfiles)
+tem <- matrix(NA, 2101, nfiles)
+for(f in 1:nfiles){
+    print(sprintf("%d of %d", f, nfiles))
+    fname <- flist[f]
+    f.list <- load.from.name(fname, fpath)
+    obs <- with(f.list, prospect(c(N, Cab, Car, Cw, Cm), 5))
+    obs[,1] <- obs[,1] + f.list$noise
+    obs[,2] <- obs[,2] + generate.noise(fw=11, sigma=0.00025, fsd=2)
+    mod <- with(f.list, prospect(c(N.mu, Cab.mu, Car.mu, Cw.mu, Cm.mu), 5))
+    rem[,f] <- mod[,1] - obs[,1]
+    tem[,f] <- mod[,2] - obs[,2]
+}
+
 #' # Plotting the error
 #' Here, we define a function that takes an error matrix as input and produces 
 #' a nicely formatted `ggplot` graphic as output. The function first calculates 
@@ -152,16 +189,33 @@ te.all.raw <- error.plot(tem.all.raw)
 te.h.raw <- error.plot(tem.h.raw)
 te.c.raw <- error.plot(tem.c.raw)
 
-#' With all six plots generated, we then post-process these plots to create a 
-#' single multi-panel figure. To emphasize differences between hardwoods and 
-#' conifers, we set common y-axis limits for reflectance and again for 
-#' transmittance. We also eliminate redundant axes where appropriate.
+re.sim.raw <- error.plot(rem)
+te.sim.raw <- error.plot(tem)
+
+#' We then define a common theme for all plots to ensure consistent font sizes 
+#' and margins.
 
 th.all <- theme_bw() +
     theme(text = element_text(size=11),
           axis.text = element_text(size=rel(0.6)),
           axis.title = element_text(size=rel(0.8)),
           plot.margin = unit(c(0.15, 0.15, 0.15, 0.15), "lines"))
+
+#' Next, we generate a simple, two-panel figure showing errors arising from the 
+#' inversion only. This figure is simpler than the subsequent figure showing 
+#' PROSPECT model errors, so it requires minimal post-processing
+
+re.sim <- re.sim.raw + ylab("Reflectance error (Model - Obs.)") + th.all
+te.sim <- te.sim.raw + ylab("Transmittance error (Model - Obs.)") + th.all
+pdf("manuscript/figures/sim-refltrans-validation.pdf", width=6, height=4)
+grid.arrange(re.sim, te.sim, nrow=2)
+dev.off()
+
+#' The following block generates a 6-panel figure showing errors between 
+#' inversion estimates and real spectra.  To emphasize differences between 
+#' hardwoods and conifers, we set common y-axis limits for reflectance and 
+#' again for transmittance. We also eliminate redundant axes where appropriate.
+
 th.mr <- theme(axis.title.y = element_blank()) 
 re.ylims <- ylim(-0.04, 0.04)
 te.ylims <- ylim(-0.28, 0.14)
