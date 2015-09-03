@@ -38,11 +38,11 @@ simulation.dat <- simulation.dat[!is.na(sensor)]
 #' use the `data.table` column definition syntax (via the `:=` operator) to 
 #' perform this efficiently.
 
-simulation.dat[, N.rsd := 100 * N.N.sigma / N.mu]
-simulation.dat[, Cab.rsd := 100 * Cab.Cab.sigma / Cab.mu]
-simulation.dat[, Car.rsd := 100 * Car.Car.sigma / Car.mu]
-simulation.dat[, Cw.rsd := 100 * Cw.Cw.sigma / Cw.mu]
-simulation.dat[, Cm.rsd := 100 * Cm.Cm.sigma / Cm.mu]
+simulation.dat[, N.rsd := 100 * N.sigma / N.mu]
+simulation.dat[, Cab.rsd := 100 * Cab.sigma / Cab.mu]
+simulation.dat[, Car.rsd := 100 * Car.sigma / Car.mu]
+simulation.dat[, Cw.rsd := 100 * Cw.sigma / Cw.mu]
+simulation.dat[, Cm.rsd := 100 * Cm.sigma / Cm.mu]
 simulation.dat[, N.cv := 100 * (N.mu - N)/N]
 simulation.dat[, Cab.cv := 100 * (Cab.mu - Cab)/Cab]
 simulation.dat[, Car.cv := 100 * (Car.mu - Car)/Car]
