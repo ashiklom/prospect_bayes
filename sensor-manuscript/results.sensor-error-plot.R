@@ -33,7 +33,8 @@ simulation.dat[, sensor := factor(sensor, levels=sensor.proper)]
 #' separate column to be displayed as annotated arrows pointing outside the 
 #' plot extent and recoded the original values as `NA`. We arbitrarily define 
 #' outliers as Car estimates that are more than double the true estimate.
-simulation.dat[Car.mu/Car > 2, Car.out.x := 
+simulation.dat[Car.mu/Car > 2, 
+               c("Car.mu", "Car", "Car.out.x", "Car.out.y") := list(NA, NA, Car, Car.mu)]
 
 #' # Plot specifications
 #' The following lines provide graphical preferences for the plot. The `no.x` 
@@ -58,7 +59,11 @@ gen.plot <- ggplot(simulation.dat) +
 
 N.plot <- gen.plot + aes(x=N, y=N.mu) + ylab("N") + no.x
 Cab.plot <- gen.plot + aes(x=Cab, y=Cab.mu) + ylab("Cab") + no.x
-Car.plot <- gen.plot + aes(x=Car, y=Car.mu) + ylab("Car") + no.x
+y1 <- 22.5
+y2 <- 23
+Car.plot <- gen.plot + aes(x=Car, y=Car.mu) + ylab("Car") + no.x + ylim(0,y2) +
+    geom_segment(aes(x=Car.out.x, y=y1, xend=Car.out.x, yend=y2), size=0.5, color="purple",
+                 arrow=arrow(length=unit(0.02, "in"), type="closed"))
 Cw.plot <- gen.plot + aes(x=Cw, y=Cw.mu) + ylab("Cw") + no.x
 Cm.plot <- gen.plot + aes(x=Cm, y=Cm.mu) + ylab("Cm") + no.x
 
