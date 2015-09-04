@@ -59,7 +59,7 @@ gen.plot <- ggplot(simulation.dat) +
 
 N.plot <- gen.plot + aes(x=N, y=N.mu) + ylab("N") + no.x
 Cab.plot <- gen.plot + aes(x=Cab, y=Cab.mu) + ylab("Cab") + no.x
-y1 <- 22.5
+y1 <- 21
 y2 <- 23
 Car.plot <- gen.plot + aes(x=Car, y=Car.mu) + ylab("Car") + no.x + ylim(0,y2) +
     geom_segment(aes(x=Car.out.x, y=y1, xend=Car.out.x, yend=y2), size=0.5, color="purple",
@@ -67,6 +67,32 @@ Car.plot <- gen.plot + aes(x=Car, y=Car.mu) + ylab("Car") + no.x + ylim(0,y2) +
 Cw.plot <- gen.plot + aes(x=Cw, y=Cw.mu) + ylab("Cw") + no.x
 Cm.plot <- gen.plot + aes(x=Cm, y=Cm.mu) + ylab("Cm") + no.x
 
-pdf("manuscript/figures/sensor-error.pdf", height=7, width=7)
+pdf("manuscript/figures/sensor-bias.pdf", height=7, width=7)
 grid.arrange(N.plot, Cab.plot, Car.plot, Cw.plot, Cm.plot, ncol=1)
 dev.off()
+
+#' Here, we explore a few alternative ways of plotting the results of the 
+#' sensor simulation experiment. The figure from this section that ended up in 
+#' the supplementary information shows the relative width of the 95% confidence 
+#' interval of the inversion parameters relative to the mean as a function of 
+#' the true parameter value.  To facilitate generation and customization of 
+#' this figure, we take advantage of the `sprintf` function for string 
+#' processing combined with the `aes_string` feature from ggplot to create a 
+#' common plotting function that we then `lapply` over the list of parameters 
+#' and use `do.call` to arrange the resulting list of plots.
+
+gp2 <- ggplot(simulation.dat) + facet_grid(.~sensor) + geom_point(size=1) + gen.theme
+plt.error <- function(param, string)
+    gp2 + aes_string(x=param, y=sprintf(string, param)) + no.x
+
+# Plot of relative error vs.
+#cv.str <- "%1$s.mu/%1$s - 1"
+#cv.list <- c(lapply(params.prospect5, plt.error, string=cv.str), ncol=1)
+#do.call(grid.arrange, cv.list)
+
+riqr.str <- "(%1$s.q975 - %1$s.q25)/%1$s.mu"
+riqr.list <- c(lapply(params.prospect5, plt.error, string=riqr.str), ncol=1)
+pdf("manuscript/figures/sensor-riqr.pdf", height=7, width=7)
+do.call(grid.arrange, riqr.list)
+dev.off()
+
