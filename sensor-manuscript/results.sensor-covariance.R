@@ -69,8 +69,8 @@ true.param <- unlist(f.list[params.prospect5])
 #' vector in the function.
 col.sensor <- c("identity" = "orange",
                 "aviris.ng" = "dark blue",
-                "modis" = "dark red",
-                "landsat8" = "dark green")
+                "landsat8" = "dark red",
+                "modis" = "dark green")
 
 #' By default, R's plot function sets axes based on the entire width of the 
 #' data. This doesn't actually work very well for contour plots because the 
@@ -121,7 +121,8 @@ sensor.plot <- function(nx, ny){
     if(nx == 1) axis(2, at=pretty(yrange), labels=pretty(yrange))
     for(i in 4:1){
         dat <- samples.all[samples.all[,"sensor"] == i,]
-        densplot(dat[,nx], dat[,ny], col.sensor[i], lwd=i/2)
+        s <- col.sensor[sensor.sub[i]]
+        densplot(dat[,nx], dat[,ny], s, lwd=i/2)
     }
     abline(v=true.param[nx], lwd=1.5, lty=2)
     abline(h=true.param[ny], lwd=1.5, lty=2)
@@ -171,5 +172,9 @@ for(p in plt.list){
         sensor.plot(p[1], p[2])
     }
 }
+par(xpd=TRUE)
+legend(-0.09, 0.28, c("Full", "AVIRIS", "Landsat8", "MODIS"), 
+       pch=16, col=col.sensor, 
+       bty='n', ncol=2, x.intersp=0.5, text.width=0.33)
 dev.off()
 
