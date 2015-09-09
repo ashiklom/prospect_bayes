@@ -32,17 +32,17 @@ simulation.dat <- simulation.dat[!is.na(sensor)]
 
 #' # Calculate statistics
 #' This block of code computes the relevant statistics for each sensor. `rsd` 
-#' is the relative standard deviation, which we use as a measure of 
-#' uncertainty. `cv` is the error in the mean value of the inversion estimate 
-#' relative to the true value, which we use as the measure of inaccuracy. We 
-#' use the `data.table` column definition syntax (via the `:=` operator) to 
-#' perform this efficiently.
+#' is a measure of parameter uncertainty, defined as the width of the 95% 
+#' confidence interval divided by the mean. `cv` is the error in the mean value 
+#' of the inversion estimate relative to the true value, which we use as the 
+#' measure of inaccuracy. We use the `data.table` column definition syntax (via 
+#' the `:=` operator) to perform this efficiently.
 
-simulation.dat[, N.rsd := 100 * N.sigma / N.mu]
-simulation.dat[, Cab.rsd := 100 * Cab.sigma / Cab.mu]
-simulation.dat[, Car.rsd := 100 * Car.sigma / Car.mu]
-simulation.dat[, Cw.rsd := 100 * Cw.sigma / Cw.mu]
-simulation.dat[, Cm.rsd := 100 * Cm.sigma / Cm.mu]
+simulation.dat[, N.rsd := 100 * (N.q975 - N.q25)/ N.mu]
+simulation.dat[, Cab.rsd := 100 * (Cab.q975 - Cab.q25)/ Cab.mu]
+simulation.dat[, Car.rsd := 100 * (Car.q975 - Car.q25)/ Car.mu]
+simulation.dat[, Cw.rsd := 100 * (Cw.q975 - Cw.q25)/ Cw.mu]
+simulation.dat[, Cm.rsd := 100 * (Cm.q975 - Cm.q25)/ Cm.mu]
 simulation.dat[, N.cv := 100 * (N.mu - N)/N]
 simulation.dat[, Cab.cv := 100 * (Cab.mu - Cab)/Cab]
 simulation.dat[, Car.cv := 100 * (Car.mu - Car)/Car]
