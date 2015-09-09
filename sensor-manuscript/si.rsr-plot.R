@@ -30,13 +30,20 @@ sensors.to.plot <- sensor.rsr[!names(sensor.rsr) %in% sensors.remove]
 #' margins (`mar`; bottom, left, top, right). Then, we loop over the 
 #' `sensors.to.plot` list. For each plot, we convert the index (1-2101) to a 
 #' wavelength (400-2500) by adding 399, extract the proper name, and draw the 
-#' line plot.
+#' line plot. 
 
+pdf("manuscript/figures/sensor-rsr.pdf", width=7, height=7)
 par(mfrow = c(4,2), mar=c(2.5, 2.5, 2, 1))
 for(s.name in names(sensors.to.plot)){
     s <- sensors.to.plot[[s.name]]
-    wl <- s[,"index"] + 399
     s.proper <- sensor.proper[s.name]
-    matplot(wl, s[,-1], type='l', lty=1, xlim=c(400,2500), 
+    x.lims <- c(400, 2500)
+    #if(s.name %in% c("aviris.classic", "chris.proba")){
+        #s <- s[1:400,]
+        #x.lims <- c(400,800)
+    #}
+    wl <- s[,"index"] + 399
+    matplot(wl, s[,-1], type='l', lty=1, xlim=x.lims, 
             xlab="", ylab="", main=s.proper)
 }
+dev.off()
